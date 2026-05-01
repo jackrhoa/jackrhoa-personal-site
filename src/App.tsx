@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { SOURCES } from './sources';
 import Multiviewer from './components/Multiviewer';
 import ProgramMonitor from './components/ProgramMonitor';
@@ -22,10 +22,16 @@ export default function App() {
 
   // Key 1 (FONT 1 watermark overlay)
   const [key1Opacity, setKey1Opacity] = useState(1);
+  const [hintStep, setHintStep] = useState(0); // 0=preview bus, 1=cut, 2=done
   const [key1Transitioning, setKey1Transitioning] = useState(false);
   const key1TimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const autoTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => setHintStep(2), 15000);
+    return () => clearTimeout(t);
+  }, []);
   // Tracks key1Opacity at the start of a T-bar drag so we can interpolate
   const tBarDragStartKey1 = useRef<number | null>(null);
 
@@ -46,6 +52,7 @@ export default function App() {
     const willBkgd = nextTransBkgd && previewIdx !== programIdx;
     const willKey1 = nextTransKey1;
     if (!willBkgd && !willKey1) return;
+    setHintStep(2);
 
     if (willBkgd) {
       setProgramIdx(previewIdx);
@@ -64,6 +71,7 @@ export default function App() {
     const willKey1 = nextTransKey1;
     if (!willBkgd && !willKey1) return;
 
+    setHintStep(2);
     setIsTransitioning(true);
 
     const targetIdx = previewIdx;
@@ -104,6 +112,7 @@ export default function App() {
     const restPos = tBarAtTop ? 100 : 0;
     if (tBarDragStartKey1.current === null && val !== restPos) {
       tBarDragStartKey1.current = key1Opacity;
+      setHintStep(prev => prev < 2 ? 2 : prev);
     }
 
     setTBarPosition(val);
@@ -152,6 +161,7 @@ export default function App() {
 
   const handlePreviewSelect = useCallback((idx: number) => {
     setPreviewIdx(idx);
+    setHintStep(prev => prev === 0 ? 1 : prev);
   }, []);
 
   // ── Standalone Key 1 controls (independent of next-trans toggles) ─
@@ -216,6 +226,7 @@ export default function App() {
         nextTransKey1={nextTransKey1}
         key1Active={key1Active}
         key1Transitioning={key1Transitioning}
+        hintStep={hintStep}
         onProgramSelect={handleProgramSelect}
         onPreviewSelect={handlePreviewSelect}
         onTBarChange={handleTBarChange}

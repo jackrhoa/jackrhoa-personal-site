@@ -2,12 +2,63 @@ interface Props {
   onCut: () => void;
   onAuto: () => void;
   isTransitioning: boolean;
+  showHint: boolean;
 }
 
-export default function TransitionSection({ onCut, onAuto, isTransitioning }: Props) {
+export default function TransitionSection({ onCut, onAuto, isTransitioning, showHint }: Props) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 px-4">
+    <div className="flex flex-col items-center justify-center gap-3 px-4" style={{ position: 'relative' }}>
       <span className="text-xs tracking-widest text-gray-500 uppercase" style={{ fontSize: '9px' }}>TRANSITION</span>
+
+      {/* Onboarding hint — points to CUT */}
+      {showHint && (
+        <div className="hint-bubble" style={{
+          position: 'absolute',
+          bottom: 'calc(100% + 12px)',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(0,0,0,0.92)',
+          border: '1px solid #555',
+          borderRadius: 6,
+          padding: '8px 12px',
+          whiteSpace: 'nowrap',
+          zIndex: 100,
+          textAlign: 'center',
+        }}>
+          <span style={{ color: '#e0e0e0', fontSize: '11px', fontFamily: 'monospace' }}>
+            Now press{' '}
+          </span>
+          <span style={{ color: '#fff', fontSize: '12px', fontWeight: 'bold', fontFamily: 'monospace', letterSpacing: '0.1em' }}>
+            CUT
+          </span>
+          <span style={{ color: '#e0e0e0', fontSize: '11px', fontFamily: 'monospace' }}>
+            {' '}to go to that page
+          </span>
+          {/* Arrow pointing down */}
+          <div style={{
+            position: 'absolute',
+            bottom: -7,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 0,
+            height: 0,
+            borderLeft: '7px solid transparent',
+            borderRight: '7px solid transparent',
+            borderTop: '7px solid #555',
+          }} />
+          <div style={{
+            position: 'absolute',
+            bottom: -6,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 0,
+            height: 0,
+            borderLeft: '6px solid transparent',
+            borderRight: '6px solid transparent',
+            borderTop: '6px solid rgba(0,0,0,0.92)',
+          }} />
+        </div>
+      )}
 
       <button
         onClick={onCut}
@@ -41,9 +92,6 @@ export default function TransitionSection({ onCut, onAuto, isTransitioning }: Pr
         <span style={{ display: 'block', lineHeight: 1.2 }}>AUTO<br />TRANS</span>
       </button>
 
-      {isTransitioning && (
-        <span className="text-xs text-yellow-400 tracking-widest" style={{ fontSize: '9px' }}>TRANS...</span>
-      )}
     </div>
   );
 }

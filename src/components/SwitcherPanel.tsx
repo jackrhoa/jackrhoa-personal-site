@@ -10,6 +10,7 @@ interface Props {
   nextTransKey1: boolean;
   key1Active: boolean;
   key1Transitioning: boolean;
+  hintStep: number;
   onProgramSelect: (idx: number) => void;
   onPreviewSelect: (idx: number) => void;
   onTBarChange: (val: number) => void;
@@ -116,7 +117,7 @@ function KeySection({ active, animating, onCut, onAuto }: {
 export default function SwitcherPanel({
   programIdx, previewIdx, tBarPosition, isTransitioning,
   nextTransBkgd, nextTransKey1,
-  key1Active, key1Transitioning,
+  key1Active, key1Transitioning, hintStep,
   onProgramSelect, onPreviewSelect, onTBarChange, onCut, onAuto,
   onCutKey1, onAutoKey1, onToggleBkgd, onToggleKey1,
 }: Props) {
@@ -135,7 +136,40 @@ export default function SwitcherPanel({
       {/* Bus rows */}
       <div className="flex flex-col justify-center gap-2">
         <BusRow selectedIdx={programIdx} busType="program" onSelect={onProgramSelect} />
-        <BusRow selectedIdx={previewIdx} busType="preview" onSelect={onPreviewSelect} />
+
+        {/* Preview row wrapped so hint arrow points directly at it */}
+        <div style={{ position: 'relative' }}>
+          <BusRow selectedIdx={previewIdx} busType="preview" onSelect={onPreviewSelect} />
+
+          {hintStep === 0 && (
+            <div className="hint-bubble" style={{
+              position: 'absolute',
+              bottom: 'calc(100% + 12px)',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'rgba(0,0,0,0.92)',
+              border: '1px solid #555',
+              borderRadius: 6,
+              padding: '8px 12px',
+              whiteSpace: 'nowrap',
+              zIndex: 100,
+              textAlign: 'center',
+            }}>
+              <span style={{ color: '#86efac', fontSize: '11px', fontFamily: 'monospace', fontWeight: 'bold', letterSpacing: '0.08em' }}>PREVIEW</span>
+              <span style={{ color: '#e0e0e0', fontSize: '11px', fontFamily: 'monospace' }}> — select a page to go to next</span>
+              <div style={{
+                position: 'absolute', bottom: -7, left: '50%', transform: 'translateX(-50%)',
+                width: 0, height: 0,
+                borderLeft: '7px solid transparent', borderRight: '7px solid transparent', borderTop: '7px solid #555',
+              }} />
+              <div style={{
+                position: 'absolute', bottom: -6, left: '50%', transform: 'translateX(-50%)',
+                width: 0, height: 0,
+                borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '6px solid rgba(0,0,0,0.92)',
+              }} />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ME1: T-bar + CUT/AUTO + BKGD/KEY1 toggles */}
@@ -163,7 +197,7 @@ export default function SwitcherPanel({
           <span className="text-gray-600 tracking-widest" style={{ fontSize: '9px' }}>{Math.round(tBarPosition)}%</span>
         </div>
 
-        <TransitionSection onCut={onCut} onAuto={onAuto} isTransitioning={isTransitioning} />
+        <TransitionSection onCut={onCut} onAuto={onAuto} isTransitioning={isTransitioning} showHint={hintStep === 1} />
 
         <NextTransToggles
           bkgd={nextTransBkgd}

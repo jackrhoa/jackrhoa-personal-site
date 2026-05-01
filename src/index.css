@@ -30,6 +30,19 @@ input[type="range"].tbar:active {
   cursor: grabbing;
 }
 
+/* Onboarding hint bubble */
+@keyframes hint-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.15); }
+  50% { box-shadow: 0 0 0 6px rgba(255,255,255,0.0); }
+}
+@keyframes hint-bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-4px); }
+}
+.hint-bubble {
+  animation: hint-bounce 1.4s ease-in-out infinite, hint-pulse 1.4s ease-in-out infinite;
+}
+
 /* Pulsing ON AIR badge */
 @keyframes pulse-red {
   0%, 100% { opacity: 1; }
