@@ -5,7 +5,8 @@ import ColorBars from './ColorBars';
 interface Props {
   source: Source;
   previewSource: Source;
-  crossfadeOpacity: number; // 0–1, how much of previewSource is visible
+  crossfadeOpacity: number;
+  key1Opacity: number; // 0–1, watermark overlay intensity
 }
 
 function SourceDisplay({ source }: { source: Source }) {
@@ -23,20 +24,41 @@ function SourceDisplay({ source }: { source: Source }) {
   );
 }
 
-export default function ProgramMonitor({ source, previewSource, crossfadeOpacity }: Props) {
-  const previewOpacity = crossfadeOpacity;
-
+function WatermarkOverlay() {
   return (
-    <div className="relative flex-1 overflow-hidden rounded" style={{ minHeight: 0, background: source.bg }}>
+    <svg
+      viewBox="0 0 32 32"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ position: 'absolute', top: '3.5%', right: '3.5%', width: '10%', height: 'auto' }}
+    >
+      <circle cx="16" cy="16" r="16" fill="black" fillOpacity="0.4" />
+      <path d="M12 8 L12 20 Q12 24 8 24 Q4 24 4 20"
+        stroke="#16a34a" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M18 8 L18 24 M18 8 L22 8 Q26 8 26 12 Q26 16 22 16 L18 16 M22 16 L26 24"
+        stroke="#16a34a" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export default function ProgramMonitor({ source, previewSource, crossfadeOpacity, key1Opacity }: Props) {
+  return (
+    <div className="relative flex-1 overflow-hidden rounded" style={{ minHeight: 0, background: '#000' }}>
       {/* Program layer */}
       <div className="absolute inset-0">
         <SourceDisplay source={source} />
       </div>
 
       {/* Preview crossfade layer */}
-      {previewOpacity > 0 && (
-        <div className="absolute inset-0" style={{ opacity: previewOpacity }}>
+      {crossfadeOpacity > 0 && (
+        <div className="absolute inset-0" style={{ opacity: crossfadeOpacity }}>
           <SourceDisplay source={previewSource} />
+        </div>
+      )}
+
+      {/* Key 1 overlay — watermark on top of everything */}
+      {key1Opacity > 0 && (
+        <div className="absolute inset-0" style={{ opacity: key1Opacity, pointerEvents: 'none' }}>
+          <WatermarkOverlay />
         </div>
       )}
 

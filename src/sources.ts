@@ -13,7 +13,7 @@ export const SOURCES: Source[] = [
   { id: 2, label: 'ABOUT',     bg: '#1a0808', text: '#ff6b6b', pageKey: 'about' },
   { id: 3, label: 'PROJECTS',  bg: '#0a1a30', text: '#4db8ff', pageKey: 'projects' },
   { id: 4, label: 'WORK SCHEDULE', busLabel: 'SCHED', bg: '#0a0a1a', text: '#aaaaff', pageKey: 'schedule' },
-  { id: 5, label: 'FONT 1',    bg: '#002a2a', text: '#6bffff' },
+  { id: 5, label: 'FONT 1',    bg: '#002a2a', text: '#6bffff', pageKey: 'font1' },
   { id: 6, label: 'BARS',      bg: '#111',    text: '#fff', isColorBars: true },
   { id: 7, label: 'BLACK',     bg: '#000',    text: '#333' },
 ];
