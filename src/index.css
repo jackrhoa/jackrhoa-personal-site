@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #0a0a0a;
+  font-family: 'Courier New', Courier, monospace;
+  color: #e0e0e0;
+  overflow: hidden;
+}
+
+/* T-bar vertical range input */
+input[type="range"].tbar {
+  -webkit-appearance: slider-vertical;
+  appearance: slider-vertical;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 28px;
+  height: 100%;
+  cursor: grab;
+  accent-color: #888;
+  background: transparent;
+}
+input[type="range"].tbar:active {
+  cursor: grabbing;
+}
+
+/* Pulsing ON AIR badge */
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.on-air-pulse {
+  animation: pulse-red 1.2s ease-in-out infinite;
+}
+
+/* Button glow effects */
+.btn-program {
+  background: #c0392b;
+  box-shadow: 0 0 8px 2px rgba(220, 50, 50, 0.7), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.btn-preview {
+  background: #27ae60;
+  box-shadow: 0 0 8px 2px rgba(40, 200, 80, 0.7), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.btn-idle {
+  background: #2c3a5a;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 4px rgba(0,0,0,0.5);
+}
+.btn-idle:hover {
+  background: #3a4f7a;
+  box-shadow: 0 0 5px rgba(100,140,220,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+}
