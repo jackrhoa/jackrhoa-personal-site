@@ -9,6 +9,7 @@ import SwitcherPanel from './components/SwitcherPanel';
 const AUTO_DURATION_MS = 1000;
 const AUTO_INTERVAL_MS = 16;
 
+
 export default function App() {
   const [programIdx, setProgramIdx] = useState(0);
   const [previewIdx, setPreviewIdx] = useState(1);

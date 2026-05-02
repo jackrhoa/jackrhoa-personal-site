@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import TEAMS, { espnLogoUrl } from '../data/teams';
 import NETWORKS from '../data/networks';
 import SPORTS from '../data/sports';
@@ -9,6 +9,16 @@ const CACHE_TTL = 5 * 60 * 1000;
 
 const BG     = '#0a0a1a';
 const ACCENT = '#aaaaff';
+
+function useMobile() {
+  const [mobile, setMobile] = useState(() => window.innerWidth < 768);
+  const handler = useCallback(() => setMobile(window.innerWidth < 768), []);
+  useEffect(() => {
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, [handler]);
+  return mobile;
+}
 
 interface CalEvent {
   id: string;
@@ -120,12 +130,12 @@ function TeamLogo({ abbrev, sport, size }: { abbrev: string; sport: string; size
 
 // ── Network badge ─────────────────────────────────────────────────────────────
 
-function NetworkBadge({ network }: { network: string }) {
+function NetworkBadge({ network, mobile = false }: { network: string; mobile?: boolean }) {
   const info = NETWORKS[network];
   const [failed, setFailed] = useState(false);
 
   if (info && !failed) {
-    const scale = info.scale ?? 1;
+    const scale = (info.scale ?? 1) * (mobile ? 0.55 : 1);
     return (
       <img
         src={info.url}
@@ -136,9 +146,8 @@ function NetworkBadge({ network }: { network: string }) {
       />
     );
   }
-  // Unknown network — display raw text as a badge
   return (
-    <span style={{ color: '#888', fontFamily: 'monospace', fontSize: 13, fontWeight: 'bold', letterSpacing: '0.08em', border: '1px solid #333', borderRadius: 3, padding: '2px 8px' }}>
+    <span style={{ color: '#888', fontFamily: 'monospace', fontSize: mobile ? 11 : 13, fontWeight: 'bold', letterSpacing: '0.08em', border: '1px solid #333', borderRadius: 3, padding: '2px 6px' }}>
       {network}
     </span>
   );
@@ -170,6 +179,7 @@ function SportBadge({ sport }: { sport: string }) {
 // ── Game card ─────────────────────────────────────────────────────────────────
 
 function GameCard({ game }: { game: GameEvent }) {
+  const mobile = useMobile();
   const timeStr = game.date ? game.date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
   const dateStr = game.date ? game.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
 
@@ -181,6 +191,62 @@ function GameCard({ game }: { game: GameEvent }) {
     .replace(/hoovision/i, '')
     .trim();
   const networkSlot = isHoovision ? 'HOOVISION' : game.network;
+
+  const networkEl = networkSlot !== null ? (
+    isHoovision
+      ? <span style={{ color: '#e0e0ff', fontFamily: 'monospace', fontSize: mobile ? 12 : 15, fontWeight: 'bold', letterSpacing: '0.08em' }}>HOOVISION</span>
+      : <NetworkBadge network={networkSlot!} mobile={mobile} />
+  ) : null;
+
+  const dateTimeEl = (
+    <div style={{ position: 'relative', textAlign: mobile ? 'right' : 'right', flexShrink: 0 }}>
+      <div style={{ color: isCanceled ? '#444' : '#7777bb', fontFamily: 'monospace', fontSize: mobile ? 12 : 15, letterSpacing: '0.05em' }}>{dateStr}</div>
+      <div style={{ color: isCanceled ? '#333' : '#aaaaff', fontFamily: 'monospace', fontSize: mobile ? 15 : 20, fontWeight: 'bold' }}>{timeStr}</div>
+      {isCanceled && (
+        <>
+          <svg viewBox="0 0 110 46" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+            <path d="M4,4 Q58,26 106,42" stroke="#cc2222" strokeWidth="7" strokeLinecap="round" fill="none" opacity="0.88" />
+            <path d="M106,4 Q52,22 4,42" stroke="#cc2222" strokeWidth="7" strokeLinecap="round" fill="none" opacity="0.88" />
+          </svg>
+          <div style={{ color: '#cc2222', fontFamily: 'monospace', fontSize: 11, fontWeight: 'bold', letterSpacing: '0.15em', marginTop: 4, textAlign: 'center' }}>CANCELED</div>
+        </>
+      )}
+    </div>
+  );
+
+  if (mobile) {
+    return (
+      <div style={{
+        display: 'flex', flexDirection: 'column', gap: 8,
+        padding: '12px 14px',
+        background: 'rgba(170,170,255,0.04)',
+        border: '1px solid rgba(170,170,255,0.1)',
+        borderRadius: 6,
+      }}>
+        {/* Row 1: sport + date/time */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <SportBadge sport={game.sport} />
+            <div style={{ color: '#555', fontFamily: 'monospace', fontSize: 9, letterSpacing: '0.1em' }}>POSITION</div>
+            <div style={{ color: '#e0e0ff', fontFamily: 'monospace', fontSize: 13, fontWeight: 'bold', letterSpacing: '0.08em', lineHeight: 1.25 }}>{displayPosition}</div>
+          </div>
+          {dateTimeEl}
+        </div>
+        {/* Row 2: matchup */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
+          <TeamLogo abbrev={game.awayAbbrev} sport={game.sport} size={34} />
+          <span style={{ color: '#444', fontFamily: 'monospace', fontSize: 16, fontWeight: 'bold', flexShrink: 0 }}>
+            {game.neutral ? 'VS' : '@'}
+          </span>
+          <TeamLogo abbrev={game.homeAbbrev} sport={game.sport} size={34} />
+        </div>
+        {/* Row 3: network */}
+        {networkEl && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>{networkEl}</div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div style={{
@@ -213,33 +279,10 @@ function GameCard({ game }: { game: GameEvent }) {
       </div>
 
       {/* Network / Hoovision */}
-      {networkSlot !== null && (
-        <div style={{ flexShrink: 0 }}>
-          {isHoovision ? (
-            <span style={{ color: '#e0e0ff', fontFamily: 'monospace', fontSize: 15, fontWeight: 'bold', letterSpacing: '0.08em' }}>HOOVISION</span>
-          ) : (
-            <NetworkBadge network={networkSlot!} />
-          )}
-        </div>
-      )}
+      {networkEl && <div style={{ flexShrink: 0 }}>{networkEl}</div>}
 
       {/* Date / time */}
-      <div style={{ minWidth: 110, flexShrink: 0, textAlign: 'right', position: 'relative' }}>
-        <div style={{ color: isCanceled ? '#444' : '#7777bb', fontFamily: 'monospace', fontSize: 15, letterSpacing: '0.05em' }}>{dateStr}</div>
-        <div style={{ color: isCanceled ? '#333' : '#aaaaff', fontFamily: 'monospace', fontSize: 20, fontWeight: 'bold' }}>{timeStr}</div>
-        {isCanceled && (
-          <>
-            <svg
-              viewBox="0 0 110 46"
-              style={{ position: 'absolute', inset: 0, width: '100%', height: 46, pointerEvents: 'none' }}
-            >
-              <path d="M4,4 Q58,26 106,42" stroke="#cc2222" strokeWidth="7" strokeLinecap="round" fill="none" opacity="0.88" />
-              <path d="M106,4 Q52,22 4,42" stroke="#cc2222" strokeWidth="7" strokeLinecap="round" fill="none" opacity="0.88" />
-            </svg>
-            <div style={{ color: '#cc2222', fontFamily: 'monospace', fontSize: 11, fontWeight: 'bold', letterSpacing: '0.15em', marginTop: 4, textAlign: 'center' }}>CANCELED</div>
-          </>
-        )}
-      </div>
+      <div style={{ minWidth: 110, flexShrink: 0 }}>{dateTimeEl}</div>
     </div>
   );
 }
@@ -247,24 +290,23 @@ function GameCard({ game }: { game: GameEvent }) {
 // ── Raw (unparsed) event ──────────────────────────────────────────────────────
 
 function RawCard({ evt }: { evt: UnparsedEvent }) {
-  const dateStr = evt.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  const mobile = useMobile();
+  const dateStr = evt.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', gap: 24,
-      padding: '14px 28px',
+      display: 'flex', flexDirection: mobile ? 'column' : 'row', alignItems: mobile ? 'flex-start' : 'center', gap: mobile ? 4 : 24,
+      padding: mobile ? '10px 14px' : '14px 28px',
       background: 'rgba(255,255,255,0.02)',
       border: '1px solid #222',
       borderRadius: 6,
     }}>
-      <span style={{ color: '#555', fontFamily: 'monospace', fontSize: 14, minWidth: 110 }}>{dateStr}</span>
-      <span style={{ color: '#666', fontFamily: 'monospace', fontSize: 16 }}>{evt.raw}</span>
+      <span style={{ color: '#555', fontFamily: 'monospace', fontSize: mobile ? 11 : 14, minWidth: mobile ? 0 : 110 }}>{dateStr}</span>
+      <span style={{ color: '#666', fontFamily: 'monospace', fontSize: mobile ? 13 : 16 }}>{evt.raw}</span>
     </div>
   );
 }
 
 // ── Root ──────────────────────────────────────────────────────────────────────
-
-const PER_PAGE = 3;
 
 function NavButton({ onClick, disabled, children }: { onClick: () => void; disabled: boolean; children: React.ReactNode }) {
   return (
@@ -285,17 +327,26 @@ function NavButton({ onClick, disabled, children }: { onClick: () => void; disab
   );
 }
 
-export default function SchedulePage() {
+export default function SchedulePage({ perPage = 3, fullPage = false }: { perPage?: number; fullPage?: boolean }) {
+  const mobile = useMobile();
   const [events, setEvents]   = useState<CalEvent[]>(cachedEvents ?? []);
   const [loading, setLoading] = useState(cachedEvents === null);
-  const [page, setPage]       = useState(sharedPage);
+  // Full-page view has its own independent page state; switcher instances share sharedPage
+  const [page, setPage] = useState(fullPage ? 0 : sharedPage);
+  const [showAll, setShowAll] = useState(false);
 
-  // Keep all instances (multiviewer, preview, program) in sync
+  const navigate = (p: number) => {
+    if (fullPage) setPage(p);
+    else setSharedPage(p);
+  };
+
+  // Keep switcher instances in sync via shared page
   useEffect(() => {
+    if (fullPage) return;
     const handler = () => setPage(sharedPage);
     window.addEventListener('schedule-page', handler);
     return () => window.removeEventListener('schedule-page', handler);
-  }, []);
+  }, [fullPage]);
 
   useEffect(() => {
     if (cachedEvents !== null && Date.now() - cacheTime < CACHE_TTL) {
@@ -322,23 +373,23 @@ export default function SchedulePage() {
 
   const now    = new Date();
   const parsed = events.map(parseEvent);
-  const past     = parsed.filter(e => e.data.date < now); // chronological, oldest first
-  const upcoming = parsed.filter(e => e.data.date >= now); // soonest first
+  const past     = parsed.filter(e => e.data.date < now);
+  const upcoming = parsed.filter(e => e.data.date >= now);
 
   const isViewingPast      = page < 0;
-  const totalPastPages     = Math.ceil(past.length / PER_PAGE);
-  const totalUpcomingPages = Math.max(1, Math.ceil(upcoming.length / PER_PAGE));
+  const totalPastPages     = Math.ceil(past.length / perPage);
+  const totalUpcomingPages = Math.max(1, Math.ceil(upcoming.length / perPage));
 
   let pageItems: ReturnType<typeof parseEvent>[];
   let pageDisplay = '';
   if (isViewingPast) {
-    const pastPageIdx = (-page) - 1; // 0 = most recent past page
-    const endIdx   = past.length - pastPageIdx * PER_PAGE;
-    const startIdx = Math.max(0, endIdx - PER_PAGE);
-    pageItems = past.slice(startIdx, endIdx); // oldest at top, most recent at bottom
+    const pastPageIdx = (-page) - 1;
+    const endIdx   = past.length - pastPageIdx * perPage;
+    const startIdx = Math.max(0, endIdx - perPage);
+    pageItems = past.slice(startIdx, endIdx);
     if (totalPastPages > 1) pageDisplay = `${pastPageIdx + 1} / ${totalPastPages}`;
   } else {
-    pageItems = upcoming.slice(page * PER_PAGE, (page + 1) * PER_PAGE);
+    pageItems = upcoming.slice(page * perPage, (page + 1) * perPage);
     if (totalUpcomingPages > 1) pageDisplay = `${page + 1} / ${totalUpcomingPages}`;
   }
 
@@ -347,29 +398,54 @@ export default function SchedulePage() {
   const label      = isViewingPast ? 'PAST GAMES' : 'UPCOMING SCHEDULE';
   const labelColor = isViewingPast ? '#7777bb' : ACCENT;
 
+  const padding = fullPage
+    ? (mobile ? '20px 16px' : '48px 64px')
+    : '36px 44px';
+  const allItems = [...past, ...upcoming];
+  const titleSize = fullPage ? (mobile ? 22 : 36) : 28;
+
   return (
-    <div style={{ width: '100%', height: '100%', background: BG, padding: '36px 44px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
-      {/* Header — arrows on left to stay clear of watermark */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20, borderBottom: '1px solid rgba(170,170,255,0.2)', paddingBottom: 14 }}>
-        <NavButton onClick={() => setSharedPage(page - 1)} disabled={!canGoPrev}>◀</NavButton>
-        <NavButton onClick={() => setSharedPage(page + 1)} disabled={!canGoNext}>▶</NavButton>
-        <span style={{ color: labelColor, fontFamily: 'monospace', fontSize: 28, fontWeight: 'bold', letterSpacing: '0.15em' }}>
-          {label}
+    <div style={{ width: '100%', height: fullPage ? '100vh' : '100%', background: BG, padding, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', overflow: showAll ? 'auto' : 'hidden' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: mobile ? 10 : 16, marginBottom: mobile ? 14 : 20, borderBottom: '1px solid rgba(170,170,255,0.2)', paddingBottom: mobile ? 10 : 14, flexShrink: 0 }}>
+        {!showAll && <NavButton onClick={() => navigate(page - 1)} disabled={!canGoPrev}>◀</NavButton>}
+        {!showAll && <NavButton onClick={() => navigate(page + 1)} disabled={!canGoNext}>▶</NavButton>}
+        <span style={{ color: showAll ? ACCENT : labelColor, fontFamily: 'monospace', fontSize: titleSize, fontWeight: 'bold', letterSpacing: '0.15em' }}>
+          {showAll ? 'ALL GAMES' : label}
         </span>
-        {pageDisplay && (
-          <span style={{ color: '#444', fontFamily: 'monospace', fontSize: 14, marginLeft: 'auto', paddingRight: '12%' }}>
+        {!showAll && pageDisplay && (
+          <span style={{ color: '#444', fontFamily: 'monospace', fontSize: 14, marginLeft: 'auto', paddingRight: fullPage ? 0 : '12%' }}>
             {pageDisplay}
           </span>
         )}
+        {fullPage && (
+          <button
+            onClick={() => setShowAll(v => !v)}
+            style={{
+              marginLeft: showAll || !pageDisplay ? 'auto' : undefined,
+              background: 'none',
+              border: `1px solid ${showAll ? ACCENT : '#333'}`,
+              color: showAll ? ACCENT : '#555',
+              fontFamily: 'monospace',
+              fontSize: mobile ? 11 : 12,
+              letterSpacing: '0.1em',
+              padding: mobile ? '4px 10px' : '6px 16px',
+              borderRadius: 4,
+              cursor: 'pointer',
+            }}
+          >
+            {showAll ? 'PAGINATE' : 'SHOW ALL'}
+          </button>
+        )}
       </div>
 
-      {pageItems.length === 0 ? (
-        <div style={{ color: '#555', fontFamily: 'monospace', fontSize: 22, letterSpacing: '0.1em' }}>
+      {(showAll ? allItems : pageItems).length === 0 ? (
+        <div style={{ color: '#555', fontFamily: 'monospace', fontSize: mobile ? 16 : 22, letterSpacing: '0.1em' }}>
           {isViewingPast ? 'NO PAST GAMES' : 'NO UPCOMING EVENTS'}
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
-          {pageItems.map(e =>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: mobile ? 10 : fullPage ? 14 : 10, flex: showAll ? undefined : 1 }}>
+          {(showAll ? allItems : pageItems).map(e =>
             e.kind === 'game'
               ? <GameCard key={e.data.id} game={e.data} />
               : <RawCard  key={e.data.id} evt={e.data} />
