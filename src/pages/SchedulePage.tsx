@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import TEAMS, { espnLogoUrl } from '../data/teams';
 import NETWORKS from '../data/networks';
 import SPORTS from '../data/sports';
@@ -265,6 +265,7 @@ function NavButton({ onClick, disabled, children }: { onClick: () => void; disab
 
 export default function SchedulePage({ perPage = 3, fullPage = false }: { perPage?: number; fullPage?: boolean }) {
   const mobile = useMobile();
+  const containerRef = useRef<HTMLDivElement>(null);
   const [events, setEvents]   = useState<CalEvent[]>(cachedEvents ?? []);
   const [loading, setLoading] = useState(cachedEvents === null);
   // Full-page view has its own independent page state; switcher instances share sharedPage
@@ -274,6 +275,7 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
   const navigate = (p: number) => {
     if (fullPage) setPage(p);
     else setSharedPage(p);
+    containerRef.current?.scrollTo({ top: 0 });
   };
 
   // Keep switcher instances in sync via shared page
@@ -341,7 +343,7 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
   const titleSize = fullPage ? (mobile ? 22 : 36) : 28;
 
   return (
-    <div style={{ width: '100%', height: fullPage ? '100vh' : '100%', background: BG, padding, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
+    <div ref={containerRef} style={{ width: '100%', height: fullPage ? '100vh' : '100%', background: BG, padding, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: mobile ? 10 : 16, marginBottom: mobile ? 14 : 20, borderBottom: '1px solid rgba(170,170,255,0.2)', paddingBottom: mobile ? 10 : 14, flexShrink: 0 }}>
         {!showAll && <NavButton onClick={() => navigate(page - 1)} disabled={!canGoPrev}>◀</NavButton>}
@@ -386,6 +388,12 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
               ? <GameCard key={e.data.id} game={e.data} />
               : <RawCard  key={e.data.id} evt={e.data} />
           )}
+        </div>
+      )}
+      {mobile && !showAll && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 16, paddingTop: 16, flexShrink: 0 }}>
+          <NavButton onClick={() => navigate(page - 1)} disabled={!canGoPrev}>◀</NavButton>
+          <NavButton onClick={() => navigate(page + 1)} disabled={!canGoNext}>▶</NavButton>
         </div>
       )}
       <div style={{ flexShrink: 0, height: mobile ? 24 : 48 }} />
