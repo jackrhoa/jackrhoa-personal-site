@@ -263,7 +263,7 @@ function GameCard({ game }: { game: GameEvent }) {
     game.recordingUrl                                      ? <ActionButton href={game.recordingUrl} label="▶ RECORDING" />
     : inPreStart && game.liveUrl                           ? <CountdownButton href={game.liveUrl} countdown={countdown} />
     : (isLive || inWatchBuffer) && game.liveUrl            ? <ActionButton href={game.liveUrl} label="WATCH" />
-    : inPastWatch && game.liveUrl                          ? <ActionButton href={game.liveUrl} label="WATCH" />
+    : inPastWatch && game.liveUrl                          ? <WatchLiveButton href={game.liveUrl} />
     : null;
 
   const isCanceled  = CANCELED_REGEX.test(game.position);
