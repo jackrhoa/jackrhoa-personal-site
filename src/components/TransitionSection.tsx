@@ -61,6 +61,7 @@ export default function TransitionSection({ onCut, onAuto, isTransitioning, show
       )}
 
       <button
+        data-testid="cut-transition"
         onClick={onCut}
         disabled={isTransitioning}
         title="Instantly cut preview to program"
@@ -77,6 +78,7 @@ export default function TransitionSection({ onCut, onAuto, isTransitioning, show
       </button>
 
       <button
+        data-testid="auto-transition"
         onClick={onAuto}
         disabled={isTransitioning}
         title="Smooth dissolve from program to preview"

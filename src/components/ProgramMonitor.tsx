@@ -69,7 +69,7 @@ export default function ProgramMonitor({ source, previewSource, crossfadeOpacity
       </div>
 
       {/* Source label */}
-      <div className="absolute bottom-3 left-3 px-2 py-0.5 rounded text-xs tracking-widest" style={{ background: 'rgba(0,0,0,0.75)', zIndex: 10 }}>
+      <div data-testid="program-label" className="absolute bottom-3 left-3 px-2 py-0.5 rounded text-xs tracking-widest" style={{ background: 'rgba(0,0,0,0.75)', zIndex: 10 }}>
         {source.label}
       </div>
     </div>

@@ -2,6 +2,10 @@ import { useEffect, useState, useCallback } from 'react';
 import TEAMS, { espnLogoUrl } from '../data/teams';
 import NETWORKS from '../data/networks';
 import SPORTS from '../data/sports';
+import {
+  type CalEvent, type GameEvent, type UnparsedEvent, type ParsedEvent,
+  CANCELED_REGEX, HOOVISION_REGEX, parseEvent, stripPositionTags,
+} from './scheduleUtils';
 
 const CALENDAR_ID = 'e398559c5a1cbfb6b616fe196ad845c4dd30721af94e6c14efb47ad0a4488993@group.calendar.google.com';
 const API_KEY = import.meta.env.VITE_GOOGLE_CALENDAR_API_KEY as string;
@@ -20,13 +24,6 @@ function useMobile() {
   return mobile;
 }
 
-interface CalEvent {
-  id: string;
-  summary: string;
-  start: { dateTime?: string; date?: string };
-  end:   { dateTime?: string; date?: string };
-}
-
 let cachedEvents: CalEvent[] | null = null;
 let cacheTime = 0;
 let sharedPage = 0;
@@ -34,67 +31,6 @@ let sharedPage = 0;
 function setSharedPage(p: number) {
   sharedPage = p;
   window.dispatchEvent(new CustomEvent('schedule-page'));
-}
-
-// ── Parser ────────────────────────────────────────────────────────────────────
-// Format: "CFB | CLEM @ HOU | ESPN | TD"  (@ = away@home, vs = neutral)
-// Falls back to raw title if format doesn't match.
-
-interface GameEvent {
-  id: string;
-  date: Date;
-  sport: string;
-  awayAbbrev: string;
-  homeAbbrev: string;
-  neutral: boolean;
-  network: string | null;
-  position: string;
-  raw: string; // original title
-}
-
-interface UnparsedEvent {
-  id: string;
-  date: Date;
-  raw: string;
-}
-
-type ParsedEvent = { kind: 'game'; data: GameEvent } | { kind: 'raw'; data: UnparsedEvent };
-
-// Format: "TD - CFB vs CLEM (ESPN)" or "TD - FOOTBALL vs VIRGINIA TECH (ESPN)"
-// Network is optional. Must contain " vs " to be parsed as a game.
-// Home team is always UVA. Sport accepts abbreviation or full name; always stored as abbreviation.
-const SPORT_REVERSE: Record<string, string> = Object.fromEntries(
-  Object.entries(SPORTS).map(([abbrev, name]) => [name.toUpperCase(), abbrev])
-);
-
-function normalizeSport(raw: string): string {
-  const upper = raw.trim().toUpperCase();
-  if (SPORTS[upper] !== undefined) return upper;
-  return SPORT_REVERSE[upper] ?? upper;
-}
-
-function parseEvent(evt: CalEvent): ParsedEvent {
-  const date = evt.start.dateTime ? new Date(evt.start.dateTime)
-    : (() => { const [y,m,d] = (evt.start.date!).split('-').map(Number); return new Date(y,m-1,d); })();
-
-  const m = evt.summary.match(/^(.+?)\s*-\s*(.+?)\s+vs\s+(.+?)(?:\s*\(([^)]+)\))?\s*$/i);
-  if (!m) return { kind: 'raw', data: { id: evt.id, date, raw: evt.summary } };
-
-  const [, position, sport, opponent, network] = m;
-  return {
-    kind: 'game',
-    data: {
-      id: evt.id,
-      date,
-      sport:       normalizeSport(sport),
-      awayAbbrev:  opponent.trim().toUpperCase(),
-      homeAbbrev:  'UVA',
-      neutral:     false,
-      network:     network ? network.trim().toUpperCase() : null,
-      position:    position.trim().toUpperCase(),
-      raw:         evt.summary,
-    },
-  };
 }
 
 // ── Team logo ─────────────────────────────────────────────────────────────────
@@ -183,13 +119,9 @@ function GameCard({ game }: { game: GameEvent }) {
   const timeStr = game.date ? game.date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
   const dateStr = game.date ? game.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
 
-  const isCanceled  = /\(cancel+ed\)/i.test(game.position);
-  const isHoovision = /hoovision/i.test(game.position);
-  const displayPosition = game.position
-    .replace(/\s*\(cancel+ed\)/i, '')
-    .replace(/\s*\(hoovision\)/i, '')
-    .replace(/hoovision/i, '')
-    .trim();
+  const isCanceled  = CANCELED_REGEX.test(game.position);
+  const isHoovision = HOOVISION_REGEX.test(game.position);
+  const displayPosition = stripPositionTags(game.position);
   const networkSlot = isHoovision ? 'HOOVISION' : game.network;
 
   const networkEl = networkSlot !== null ? (

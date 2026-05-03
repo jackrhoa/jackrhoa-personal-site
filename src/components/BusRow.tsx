@@ -12,7 +12,7 @@ export default function BusRow({ selectedIdx, busType, onSelect }: Props) {
   const labelColor = busType === 'program' ? 'text-red-400' : 'text-green-400';
 
   return (
-    <div className="flex flex-col gap-1">
+    <div data-testid={`bus-${busType}`} className="flex flex-col gap-1">
       <span className={`text-xs font-bold tracking-widest uppercase ${labelColor}`} style={{ fontSize: '9px' }}>
         {label}
       </span>

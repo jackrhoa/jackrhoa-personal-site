@@ -72,6 +72,7 @@ function KeySection({ active, animating, onCut, onAuto }: {
     <div className="flex flex-col items-center justify-center gap-2 px-3" style={{ borderLeft: '1px solid #444', flexShrink: 0 }}>
       {/* CUT */}
       <button
+        data-testid="cut-key1"
         onClick={onCut}
         disabled={animating}
         title="Cut Key 1 on/off"
@@ -98,6 +99,7 @@ function KeySection({ active, animating, onCut, onAuto }: {
 
       {/* AUTO TRANS */}
       <button
+        data-testid="auto-key1"
         onClick={onAuto}
         disabled={animating}
         title="Fade Key 1 on/off"
