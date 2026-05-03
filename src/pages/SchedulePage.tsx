@@ -422,8 +422,10 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
 
   const now    = new Date();
   const parsed = events.map(parseEvent);
-  const past     = parsed.filter(e => (e.data.endDate ?? e.data.date) < now);
-  const upcoming = parsed.filter(e => (e.data.endDate ?? e.data.date) >= now);
+  const cutoff = (e: ReturnType<typeof parseEvent>) =>
+    e.kind === 'game' ? e.data.endDate : e.data.date;
+  const past     = parsed.filter(e => cutoff(e) < now);
+  const upcoming = parsed.filter(e => cutoff(e) >= now);
 
   const isViewingPast      = page < 0;
   const totalPastPages     = Math.ceil(past.length / perPage);
