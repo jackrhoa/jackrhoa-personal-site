@@ -3,7 +3,7 @@ import TEAMS, { espnLogoUrl } from '../data/teams';
 import NETWORKS from '../data/networks';
 import SPORTS from '../data/sports';
 import {
-  type CalEvent, type GameEvent, type UnparsedEvent, type ParsedEvent,
+  type CalEvent, type GameEvent, type UnparsedEvent,
   CANCELED_REGEX, HOOVISION_REGEX, parseEvent, stripPositionTags,
 } from './scheduleUtils';
 
