@@ -324,7 +324,7 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
     const pastPageIdx = (-page) - 1;
     const endIdx   = past.length - pastPageIdx * perPage;
     const startIdx = Math.max(0, endIdx - perPage);
-    pageItems = past.slice(startIdx, endIdx);
+    pageItems = past.slice(startIdx, endIdx).reverse();
     if (totalPastPages > 1) pageDisplay = `${pastPageIdx + 1} / ${totalPastPages}`;
   } else {
     pageItems = upcoming.slice(page * perPage, (page + 1) * perPage);
