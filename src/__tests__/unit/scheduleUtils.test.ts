@@ -3,6 +3,7 @@ import {
   normalizeSport,
   parseEvent,
   stripPositionTags,
+  parseDescriptionUrls,
   CANCELED_REGEX,
   HOOVISION_REGEX,
   GAME_REGEX,
@@ -284,5 +285,160 @@ describe('stripPositionTags', () => {
 
   it('trims surrounding whitespace', () => {
     expect(stripPositionTags('  TD  ')).toBe('TD');
+  });
+});
+
+// ── parseDescriptionUrls ──────────────────────────────────────────────────────
+
+describe('parseDescriptionUrls', () => {
+  it('returns nulls for undefined input', () => {
+    expect(parseDescriptionUrls(undefined)).toEqual({ liveUrl: null, recordingUrl: null });
+  });
+
+  it('returns nulls for empty string', () => {
+    expect(parseDescriptionUrls('')).toEqual({ liveUrl: null, recordingUrl: null });
+  });
+
+  it('parses a LIVE: url', () => {
+    const r = parseDescriptionUrls('LIVE: https://example.com/stream');
+    expect(r.liveUrl).toBe('https://example.com/stream');
+    expect(r.recordingUrl).toBeNull();
+  });
+
+  it('parses a RECORDING: url', () => {
+    const r = parseDescriptionUrls('RECORDING: https://example.com/vod');
+    expect(r.recordingUrl).toBe('https://example.com/vod');
+    expect(r.liveUrl).toBeNull();
+  });
+
+  it('parses both URLs from a multi-line description', () => {
+    const r = parseDescriptionUrls('LIVE: https://a.com/live\nRECORDING: https://b.com/vod');
+    expect(r.liveUrl).toBe('https://a.com/live');
+    expect(r.recordingUrl).toBe('https://b.com/vod');
+  });
+
+  it('is case-insensitive for labels', () => {
+    expect(parseDescriptionUrls('live: https://a.com').liveUrl).toBe('https://a.com');
+    expect(parseDescriptionUrls('Recording: https://b.com').recordingUrl).toBe('https://b.com');
+  });
+
+  it('ignores extra content between key lines', () => {
+    const r = parseDescriptionUrls('Some notes\nLIVE: https://a.com\nMore text\nRECORDING: https://b.com');
+    expect(r.liveUrl).toBe('https://a.com');
+    expect(r.recordingUrl).toBe('https://b.com');
+  });
+
+  it('handles LIVE: with no space before URL', () => {
+    expect(parseDescriptionUrls('LIVE:https://a.com').liveUrl).toBe('https://a.com');
+  });
+
+  it('prepends https:// to a protocol-less LIVE url', () => {
+    expect(parseDescriptionUrls('LIVE: espnplus.com/watch/abc').liveUrl).toBe('https://espnplus.com/watch/abc');
+  });
+
+  it('prepends https:// to a protocol-less RECORDING url', () => {
+    expect(parseDescriptionUrls('RECORDING: youtube.com/watch?v=xyz').recordingUrl).toBe('https://youtube.com/watch?v=xyz');
+  });
+
+  it('does not double-prepend https:// when protocol is already present', () => {
+    expect(parseDescriptionUrls('LIVE: https://espnplus.com/watch/abc').liveUrl).toBe('https://espnplus.com/watch/abc');
+  });
+
+  it('does not prepend https:// when http:// protocol is present', () => {
+    expect(parseDescriptionUrls('LIVE: http://example.com/stream').liveUrl).toBe('http://example.com/stream');
+  });
+
+  it('extracts href from HTML anchor tag (Google Calendar UI link format)', () => {
+    const desc = 'RECORDING: <a href="https://www.espn.com/watch/player/_/id/abc123">https://www.espn.com/watch/player/_/id/abc123</a>';
+    expect(parseDescriptionUrls(desc).recordingUrl).toBe('https://www.espn.com/watch/player/_/id/abc123');
+  });
+
+  it('extracts href from HTML anchor on LIVE line', () => {
+    const desc = 'LIVE: <a href="https://espnplus.com/watch/xyz">https://espnplus.com/watch/xyz</a>';
+    expect(parseDescriptionUrls(desc).liveUrl).toBe('https://espnplus.com/watch/xyz');
+  });
+
+  it('handles HTML anchor with single-quoted href', () => {
+    expect(parseDescriptionUrls("LIVE: <a href='https://a.com/x'>link</a>").liveUrl).toBe('https://a.com/x');
+  });
+
+  it('works when there is no href and URL is plain text (no anchor tag)', () => {
+    expect(parseDescriptionUrls('RECORDING: https://youtube.com/watch?v=xyz').recordingUrl).toBe('https://youtube.com/watch?v=xyz');
+  });
+});
+
+// ── parseEvent – endDate ──────────────────────────────────────────────────────
+
+describe('parseEvent – endDate', () => {
+  it('populates endDate from CalEvent.end.dateTime', () => {
+    const result = parseEvent({
+      id: 'x', summary: 'TD - CFB vs CLEM',
+      start: { dateTime: '2025-09-06T19:30:00-04:00' },
+      end:   { dateTime: '2025-09-06T22:30:00-04:00' },
+    });
+    expect(result.kind).toBe('game');
+    if (result.kind !== 'game') return;
+    expect(result.data.endDate).toBeInstanceOf(Date);
+    expect(result.data.endDate.getTime()).toBeGreaterThan(result.data.date.getTime());
+  });
+
+  it('populates endDate from CalEvent.end.date for all-day events', () => {
+    const result = parseEvent({
+      id: 'x', summary: 'TD - CFB vs CLEM',
+      start: { date: '2025-10-11' },
+      end:   { date: '2025-10-12' },
+    });
+    expect(result.kind).toBe('game');
+    if (result.kind !== 'game') return;
+    expect(result.data.endDate.getDate()).toBe(12);
+  });
+});
+
+// ── parseEvent – liveUrl / recordingUrl ───────────────────────────────────────
+
+describe('parseEvent – liveUrl and recordingUrl', () => {
+  it('sets both to null when description is absent', () => {
+    const result = parseEvent({
+      id: 'x', summary: 'TD - CFB vs CLEM',
+      start: { dateTime: '2025-09-06T19:30:00-04:00' },
+      end:   { dateTime: '2025-09-06T22:30:00-04:00' },
+    });
+    if (result.kind !== 'game') return;
+    expect(result.data.liveUrl).toBeNull();
+    expect(result.data.recordingUrl).toBeNull();
+  });
+
+  it('parses liveUrl from description', () => {
+    const result = parseEvent({
+      id: 'x', summary: 'TD - CFB vs CLEM',
+      description: 'LIVE: https://example.com/stream',
+      start: { dateTime: '2025-09-06T19:30:00-04:00' },
+      end:   { dateTime: '2025-09-06T22:30:00-04:00' },
+    });
+    if (result.kind !== 'game') return;
+    expect(result.data.liveUrl).toBe('https://example.com/stream');
+  });
+
+  it('parses recordingUrl from description', () => {
+    const result = parseEvent({
+      id: 'x', summary: 'TD - CFB vs CLEM',
+      description: 'RECORDING: https://example.com/vod',
+      start: { dateTime: '2025-09-06T19:30:00-04:00' },
+      end:   { dateTime: '2025-09-06T22:30:00-04:00' },
+    });
+    if (result.kind !== 'game') return;
+    expect(result.data.recordingUrl).toBe('https://example.com/vod');
+  });
+
+  it('parses both urls from description', () => {
+    const result = parseEvent({
+      id: 'x', summary: 'TD - CFB vs CLEM',
+      description: 'LIVE: https://example.com/stream\nRECORDING: https://example.com/vod',
+      start: { dateTime: '2025-09-06T19:30:00-04:00' },
+      end:   { dateTime: '2025-09-06T22:30:00-04:00' },
+    });
+    if (result.kind !== 'game') return;
+    expect(result.data.liveUrl).toBe('https://example.com/stream');
+    expect(result.data.recordingUrl).toBe('https://example.com/vod');
   });
 });

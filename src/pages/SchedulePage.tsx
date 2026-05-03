@@ -112,12 +112,84 @@ function SportBadge({ sport }: { sport: string }) {
   );
 }
 
+// ── Live badge ────────────────────────────────────────────────────────────────
+
+function LiveBadge({ liveUrl }: { liveUrl: string | null }) {
+  const inner = (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 5,
+      background: 'rgba(255,51,51,0.12)',
+      border: '1px solid rgba(255,51,51,0.4)',
+      borderRadius: 4,
+      padding: '3px 8px',
+    }}>
+      <span style={{
+        display: 'inline-block', width: 8, height: 8, borderRadius: '50%',
+        background: '#ff3333',
+        animation: 'pulse-red 1.4s ease-in-out infinite',
+        flexShrink: 0,
+      }} />
+      <span style={{ color: '#ff4444', fontFamily: 'monospace', fontSize: 11, fontWeight: 'bold', letterSpacing: '0.12em' }}>
+        LIVE
+      </span>
+    </span>
+  );
+  if (liveUrl) {
+    return (
+      <a href={liveUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex' }}>
+        {inner}
+      </a>
+    );
+  }
+  return inner;
+}
+
+// ── Action button ─────────────────────────────────────────────────────────────
+
+function ActionButton({ href, label }: { href: string; label: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        minHeight: 44,
+        padding: '0 14px',
+        background: 'rgba(170,170,255,0.08)',
+        border: '1px solid rgba(170,170,255,0.3)',
+        borderRadius: 4,
+        color: ACCENT,
+        fontFamily: 'monospace',
+        fontSize: 12,
+        fontWeight: 'bold',
+        letterSpacing: '0.1em',
+        textDecoration: 'none',
+        whiteSpace: 'nowrap',
+        cursor: 'pointer',
+      }}
+    >
+      {label}
+    </a>
+  );
+}
+
 // ── Game card ─────────────────────────────────────────────────────────────────
 
 function GameCard({ game }: { game: GameEvent }) {
   const mobile = useMobile();
   const timeStr = game.date ? game.date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
   const dateStr = game.date ? game.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+
+  const now = new Date();
+  const isLive = game.date <= now && now <= game.endDate;
+  const isPast = game.endDate < now;
+
+  const liveBadge = isLive ? <LiveBadge liveUrl={game.liveUrl} /> : null;
+  const actionButton =
+    (isLive || !isPast) && game.liveUrl   ? <ActionButton href={game.liveUrl} label="WATCH" />
+    : isPast && game.recordingUrl         ? <ActionButton href={game.recordingUrl} label="▶ RECORDING" />
+    : null;
 
   const isCanceled  = CANCELED_REGEX.test(game.position);
   const isHoovision = HOOVISION_REGEX.test(game.position);
@@ -159,6 +231,7 @@ function GameCard({ game }: { game: GameEvent }) {
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <SportBadge sport={game.sport} />
+            {liveBadge}
             <div style={{ color: '#555', fontFamily: 'monospace', fontSize: 9, letterSpacing: '0.1em' }}>POSITION</div>
             <div style={{ color: '#e0e0ff', fontFamily: 'monospace', fontSize: 13, fontWeight: 'bold', letterSpacing: '0.08em', lineHeight: 1.25 }}>{displayPosition}</div>
           </div>
@@ -176,9 +249,12 @@ function GameCard({ game }: { game: GameEvent }) {
             <TeamLogo abbrev={game.homeAbbrev} sport={game.sport} size={34} wrap />
           </div>
         </div>
-        {/* Row 3: network */}
-        {networkEl && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>{networkEl}</div>
+        {/* Row 3: action button + network */}
+        {(actionButton || networkEl) && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <div>{actionButton}</div>
+            {networkEl && <div style={{ marginLeft: 'auto' }}>{networkEl}</div>}
+          </div>
         )}
       </div>
     );
@@ -213,6 +289,41 @@ function GameCard({ game }: { game: GameEvent }) {
         </span>
         <TeamLogo abbrev={game.homeAbbrev} sport={game.sport} size={48} />
       </div>
+
+      {/* Desktop: combined WATCH LIVE button, or standalone badge/button */}
+      {(isLive || actionButton) && (
+        <div style={{ flexShrink: 0 }}>
+          {isLive && game.liveUrl ? (
+            <a href={game.liveUrl} target="_blank" rel="noopener noreferrer" style={{
+              display: 'inline-flex', alignItems: 'center', gap: 7,
+              minHeight: 36,
+              padding: '0 14px',
+              background: 'rgba(255,51,51,0.1)',
+              border: '1px solid rgba(255,51,51,0.45)',
+              borderRadius: 4,
+              color: '#ff4444',
+              fontFamily: 'monospace',
+              fontSize: 12,
+              fontWeight: 'bold',
+              letterSpacing: '0.12em',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap',
+            }}>
+              <span style={{
+                display: 'inline-block', width: 8, height: 8, borderRadius: '50%',
+                background: '#ff3333',
+                animation: 'pulse-red 1.4s ease-in-out infinite',
+                flexShrink: 0,
+              }} />
+              WATCH LIVE
+            </a>
+          ) : isLive ? (
+            liveBadge
+          ) : (
+            actionButton
+          )}
+        </div>
+      )}
 
       {/* Network / Hoovision */}
       {networkEl && <div style={{ flexShrink: 0 }}>{networkEl}</div>}
@@ -311,8 +422,8 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
 
   const now    = new Date();
   const parsed = events.map(parseEvent);
-  const past     = parsed.filter(e => e.data.date < now);
-  const upcoming = parsed.filter(e => e.data.date >= now);
+  const past     = parsed.filter(e => (e.data.endDate ?? e.data.date) < now);
+  const upcoming = parsed.filter(e => (e.data.endDate ?? e.data.date) >= now);
 
   const isViewingPast      = page < 0;
   const totalPastPages     = Math.ceil(past.length / perPage);
