@@ -452,6 +452,7 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
           )}
         </div>
       )}
+      <div style={{ flexShrink: 0, height: mobile ? 24 : 48 }} />
     </div>
   );
 }
