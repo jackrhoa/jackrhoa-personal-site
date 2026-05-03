@@ -165,12 +165,16 @@ function GameCard({ game }: { game: GameEvent }) {
           {dateTimeEl}
         </div>
         {/* Row 2: matchup */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
-          <TeamLogo abbrev={game.awayAbbrev} sport={game.sport} size={34} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', display: 'flex', justifyContent: 'flex-end' }}>
+            <TeamLogo abbrev={game.awayAbbrev} sport={game.sport} size={34} />
+          </div>
           <span style={{ color: '#444', fontFamily: 'monospace', fontSize: 16, fontWeight: 'bold', flexShrink: 0 }}>
             {game.neutral ? 'VS' : '@'}
           </span>
-          <TeamLogo abbrev={game.homeAbbrev} sport={game.sport} size={34} />
+          <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+            <TeamLogo abbrev={game.homeAbbrev} sport={game.sport} size={34} />
+          </div>
         </div>
         {/* Row 3: network */}
         {networkEl && (
