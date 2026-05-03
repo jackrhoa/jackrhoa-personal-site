@@ -282,17 +282,15 @@ function GameCard({ game }: { game: GameEvent }) {
           </div>
           {dateTimeEl}
         </div>
-        {/* Row 2: matchup — stacked so @ never clashes with team names */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        {/* Row 2: matchup */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
             <TeamLogo abbrev={game.awayAbbrev} sport={game.sport} size={30} wrap />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <span style={{ color: '#444', fontFamily: 'monospace', fontSize: 14, fontWeight: 'bold' }}>
-              {game.neutral ? 'VS' : '@'}
-            </span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+          <span style={{ color: '#444', fontFamily: 'monospace', fontSize: 14, fontWeight: 'bold', flexShrink: 0 }}>
+            {game.neutral ? 'VS' : '@'}
+          </span>
+          <div style={{ flex: 1 }}>
             <TeamLogo abbrev={game.homeAbbrev} sport={game.sport} size={30} wrap reverse />
           </div>
         </div>
