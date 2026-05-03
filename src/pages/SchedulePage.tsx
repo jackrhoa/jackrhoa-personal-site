@@ -35,7 +35,7 @@ function setSharedPage(p: number) {
 
 // ── Team logo ─────────────────────────────────────────────────────────────────
 
-function TeamLogo({ abbrev, sport, size, wrap = false, reverse = false }: { abbrev: string; sport: string; size: number; wrap?: boolean; reverse?: boolean }) {
+function TeamLogo({ abbrev, sport, size, reverse = false }: { abbrev: string; sport: string; size: number; wrap?: boolean; reverse?: boolean }) {
   const key = abbrev.toUpperCase().replace(/\s+/g, '_');
   const info = TEAMS[`${sport}:${key}`] ?? TEAMS[key];
   const [failed, setFailed] = useState(false);
@@ -293,7 +293,7 @@ function GameCard({ game }: { game: GameEvent }) {
             </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-            <TeamLogo abbrev={game.homeAbbrev} sport={game.sport} size={30} wrap />
+            <TeamLogo abbrev={game.homeAbbrev} sport={game.sport} size={30} wrap reverse />
           </div>
         </div>
         {/* Row 3: action button + network */}
@@ -445,9 +445,7 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
   }, [fullPage]);
 
   useEffect(() => {
-    if (cachedEvents !== null && Date.now() - cacheTime < CACHE_TTL) {
-      setEvents(cachedEvents); setLoading(false); return;
-    }
+    if (cachedEvents !== null && Date.now() - cacheTime < CACHE_TTL) return;
     const tMin = new Date(); tMin.setFullYear(tMin.getFullYear() - 1);
     const tMax = new Date(); tMax.setFullYear(tMax.getFullYear() + 2);
     const url =
