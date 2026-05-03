@@ -35,7 +35,7 @@ function setSharedPage(p: number) {
 
 // ── Team logo ─────────────────────────────────────────────────────────────────
 
-function TeamLogo({ abbrev, sport, size }: { abbrev: string; sport: string; size: number }) {
+function TeamLogo({ abbrev, sport, size, wrap = false }: { abbrev: string; sport: string; size: number; wrap?: boolean }) {
   const key = abbrev.toUpperCase().replace(/\s+/g, '_');
   const info = TEAMS[`${sport}:${key}`] ?? TEAMS[key];
   const [failed, setFailed] = useState(false);
@@ -57,7 +57,7 @@ function TeamLogo({ abbrev, sport, size }: { abbrev: string; sport: string; size
       ) : (
         <div style={{ width: size, height: size, flexShrink: 0 }} />
       )}
-      <span style={{ color: '#d0d0ff', fontFamily: 'monospace', fontWeight: 'bold', fontSize: size * 0.38, letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+      <span style={{ color: '#d0d0ff', fontFamily: 'monospace', fontWeight: 'bold', fontSize: size * 0.38, letterSpacing: '0.04em', whiteSpace: wrap ? 'normal' : 'nowrap', wordBreak: wrap ? 'break-word' : undefined, lineHeight: wrap ? 1.2 : undefined }}>
         {label}
       </span>
     </div>
@@ -166,14 +166,14 @@ function GameCard({ game }: { game: GameEvent }) {
         </div>
         {/* Row 2: matchup */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', display: 'flex', justifyContent: 'flex-end' }}>
-            <TeamLogo abbrev={game.awayAbbrev} sport={game.sport} size={34} />
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'flex-end' }}>
+            <TeamLogo abbrev={game.awayAbbrev} sport={game.sport} size={34} wrap />
           </div>
           <span style={{ color: '#444', fontFamily: 'monospace', fontSize: 16, fontWeight: 'bold', flexShrink: 0 }}>
             {game.neutral ? 'VS' : '@'}
           </span>
-          <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-            <TeamLogo abbrev={game.homeAbbrev} sport={game.sport} size={34} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <TeamLogo abbrev={game.homeAbbrev} sport={game.sport} size={34} wrap />
           </div>
         </div>
         {/* Row 3: network */}
