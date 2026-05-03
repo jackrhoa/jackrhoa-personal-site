@@ -1,7 +1,7 @@
 export default function HomePage() {
   return (
     <div style={{
-      width: '100%', height: '100%',
+      width: '100%', height: '100%', overflowY: 'auto',
       background: '#000', color: '#16a34a',
       fontFamily: 'Georgia, serif',
       display: 'flex', flexDirection: 'column',

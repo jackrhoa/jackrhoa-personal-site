@@ -51,7 +51,7 @@ export default function MobileApp() {
       </nav>
 
       {/* Page content */}
-      <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+      <div style={{ flex: 1, overflow: 'auto', position: 'relative' }}>
         {active === 'home'     && <HomePage />}
         {active === 'about'    && <AboutPage />}
         {active === 'projects' && <ProjectsPage />}
