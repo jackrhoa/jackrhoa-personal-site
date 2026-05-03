@@ -17,7 +17,7 @@ export default function MobileApp() {
   const [active, setActive] = useState<Tab>('home');
 
   return (
-    <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', background: '#000', boxSizing: 'border-box' }}>
+    <div style={{ width: '100%', height: '100dvh', display: 'flex', flexDirection: 'column', background: '#000', boxSizing: 'border-box' }}>
       {/* Top nav */}
       <nav style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-around',
