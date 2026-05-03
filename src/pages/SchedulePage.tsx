@@ -405,7 +405,7 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
   const titleSize = fullPage ? (mobile ? 22 : 36) : 28;
 
   return (
-    <div style={{ width: '100%', height: fullPage ? '100vh' : '100%', background: BG, padding, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', overflow: showAll ? 'auto' : 'hidden' }}>
+    <div style={{ width: '100%', height: fullPage ? '100vh' : '100%', background: BG, padding, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: mobile ? 10 : 16, marginBottom: mobile ? 14 : 20, borderBottom: '1px solid rgba(170,170,255,0.2)', paddingBottom: mobile ? 10 : 14, flexShrink: 0 }}>
         {!showAll && <NavButton onClick={() => navigate(page - 1)} disabled={!canGoPrev}>◀</NavButton>}
