@@ -35,31 +35,35 @@ function setSharedPage(p: number) {
 
 // ── Team logo ─────────────────────────────────────────────────────────────────
 
-function TeamLogo({ abbrev, sport, size, wrap = false }: { abbrev: string; sport: string; size: number; wrap?: boolean }) {
+function TeamLogo({ abbrev, sport, size, wrap = false, reverse = false }: { abbrev: string; sport: string; size: number; wrap?: boolean; reverse?: boolean }) {
   const key = abbrev.toUpperCase().replace(/\s+/g, '_');
   const info = TEAMS[`${sport}:${key}`] ?? TEAMS[key];
   const [failed, setFailed] = useState(false);
 
   const label = info?.shortName ?? abbrev;
+  const logo = info && !failed ? (
+    <img
+      src={espnLogoUrl(info.id)}
+      alt={info.name}
+      title={info.name}
+      width={size}
+      height={size}
+      style={{ objectFit: 'contain', flexShrink: 0 }}
+      onError={() => setFailed(true)}
+    />
+  ) : (
+    <div style={{ width: size, height: size, flexShrink: 0 }} />
+  );
+
+  const nameSpan = (
+    <span style={{ color: '#d0d0ff', fontFamily: 'monospace', fontWeight: 'bold', fontSize: size * 0.38, letterSpacing: '0.04em', whiteSpace: 'normal', wordBreak: 'break-word', lineHeight: 1.2 }}>
+      {label}
+    </span>
+  );
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-      {info && !failed ? (
-        <img
-          src={espnLogoUrl(info.id)}
-          alt={info.name}
-          title={info.name}
-          width={size}
-          height={size}
-          style={{ objectFit: 'contain', flexShrink: 0 }}
-          onError={() => setFailed(true)}
-        />
-      ) : (
-        <div style={{ width: size, height: size, flexShrink: 0 }} />
-      )}
-      <span style={{ color: '#d0d0ff', fontFamily: 'monospace', fontWeight: 'bold', fontSize: size * 0.38, letterSpacing: '0.04em', whiteSpace: wrap ? 'normal' : 'nowrap', wordBreak: wrap ? 'break-word' : undefined, lineHeight: wrap ? 1.2 : undefined }}>
-        {label}
-      </span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      {reverse ? <>{nameSpan}{logo}</> : <>{logo}{nameSpan}</>}
     </div>
   );
 }
@@ -144,6 +148,31 @@ function LiveBadge({ liveUrl }: { liveUrl: string | null }) {
   return inner;
 }
 
+// ── Countdown button ──────────────────────────────────────────────────────────
+
+function CountdownButton({ href, countdown }: { href: string; countdown: string }) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" style={{
+      display: 'inline-flex', alignItems: 'center', gap: 10,
+      minHeight: 44,
+      padding: '0 14px',
+      background: 'rgba(170,170,255,0.08)',
+      border: '1px solid rgba(170,170,255,0.3)',
+      borderRadius: 4,
+      color: ACCENT,
+      fontFamily: 'monospace',
+      textDecoration: 'none',
+      whiteSpace: 'nowrap',
+    }}>
+      <span style={{ fontSize: 14 }}>▶</span>
+      <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.25 }}>
+        <span style={{ fontSize: 9, letterSpacing: '0.14em', opacity: 0.6 }}>STARTS IN</span>
+        <span style={{ fontSize: 13, fontWeight: 'bold', letterSpacing: '0.08em' }}>{countdown}</span>
+      </span>
+    </a>
+  );
+}
+
 // ── Action button ─────────────────────────────────────────────────────────────
 
 function ActionButton({ href, label }: { href: string; label: string }) {
@@ -178,17 +207,33 @@ function ActionButton({ href, label }: { href: string; label: string }) {
 
 function GameCard({ game }: { game: GameEvent }) {
   const mobile = useMobile();
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
   const timeStr = game.date ? game.date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
   const dateStr = game.date ? game.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
 
-  const now = new Date();
-  const isLive = game.date <= now && now <= game.endDate;
-  const isPast = game.endDate < now;
+  const end30        = new Date(game.endDate.getTime() + 30 * 60_000);
+  const end60        = new Date(game.endDate.getTime() + 60 * 60_000);
+  const inPreStart   = now >= new Date(game.date.getTime() - 5 * 60_000) && now < game.date;
+  const isLive       = game.date <= now && now <= game.endDate;
+  const inWatchBuffer = now > game.endDate && now <= end30;   // end → end+30: still WATCH LIVE
+  const inPastWatch  = now > end30 && now <= end60;           // end+30 → end+60: WATCH in past games
+
+  const secsLeft     = inPreStart ? Math.max(0, Math.ceil((game.date.getTime() - now.getTime()) / 1000)) : 0;
+  const countdown    = `${Math.floor(secsLeft / 60)}:${(secsLeft % 60).toString().padStart(2, '0')}`;
 
   const liveBadge = isLive ? <LiveBadge liveUrl={game.liveUrl} /> : null;
+
+  // Recording always wins; otherwise: countdown → watch live/buffer → past watch window → nothing
   const actionButton =
-    (isLive || !isPast) && game.liveUrl   ? <ActionButton href={game.liveUrl} label="WATCH" />
-    : isPast && game.recordingUrl         ? <ActionButton href={game.recordingUrl} label="▶ RECORDING" />
+    game.recordingUrl                                      ? <ActionButton href={game.recordingUrl} label="▶ RECORDING" />
+    : inPreStart && game.liveUrl                           ? <CountdownButton href={game.liveUrl} countdown={countdown} />
+    : (isLive || inWatchBuffer) && game.liveUrl            ? <ActionButton href={game.liveUrl} label="WATCH" />
+    : inPastWatch && game.liveUrl                          ? <ActionButton href={game.liveUrl} label="WATCH" />
     : null;
 
   const isCanceled  = CANCELED_REGEX.test(game.position);
@@ -237,21 +282,23 @@ function GameCard({ game }: { game: GameEvent }) {
           </div>
           {dateTimeEl}
         </div>
-        {/* Row 2: matchup */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'flex-end' }}>
-            <TeamLogo abbrev={game.awayAbbrev} sport={game.sport} size={34} wrap />
+        {/* Row 2: matchup — stacked so @ never clashes with team names */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <TeamLogo abbrev={game.awayAbbrev} sport={game.sport} size={30} wrap />
           </div>
-          <span style={{ color: '#444', fontFamily: 'monospace', fontSize: 16, fontWeight: 'bold', flexShrink: 0 }}>
-            {game.neutral ? 'VS' : '@'}
-          </span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <TeamLogo abbrev={game.homeAbbrev} sport={game.sport} size={34} wrap />
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <span style={{ color: '#444', fontFamily: 'monospace', fontSize: 14, fontWeight: 'bold' }}>
+              {game.neutral ? 'VS' : '@'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+            <TeamLogo abbrev={game.homeAbbrev} sport={game.sport} size={30} wrap />
           </div>
         </div>
         {/* Row 3: action button + network */}
         {(actionButton || networkEl) && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
             <div>{actionButton}</div>
             {networkEl && <div style={{ marginLeft: 'auto' }}>{networkEl}</div>}
           </div>
@@ -282,18 +329,18 @@ function GameCard({ game }: { game: GameEvent }) {
       </div>
 
       {/* Matchup */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1, minWidth: 0, justifyContent: 'center', overflow: 'hidden' }}>
-        <TeamLogo abbrev={game.awayAbbrev} sport={game.sport} size={48} />
-        <span style={{ color: '#444', fontFamily: 'monospace', fontSize: 22, fontWeight: 'bold', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1, minWidth: 0, justifyContent: 'center' }}>
+        <TeamLogo abbrev={game.awayAbbrev} sport={game.sport} size={44} />
+        <span style={{ color: '#444', fontFamily: 'monospace', fontSize: 20, fontWeight: 'bold', flexShrink: 0 }}>
           {game.neutral ? 'VS' : '@'}
         </span>
-        <TeamLogo abbrev={game.homeAbbrev} sport={game.sport} size={48} />
+        <TeamLogo abbrev={game.homeAbbrev} sport={game.sport} size={44} reverse />
       </div>
 
-      {/* Desktop: combined WATCH LIVE button, or standalone badge/button */}
+      {/* Desktop: action area */}
       {(isLive || actionButton) && (
         <div style={{ flexShrink: 0 }}>
-          {isLive && game.liveUrl ? (
+          {!game.recordingUrl && isLive && game.liveUrl ? (
             <a href={game.liveUrl} target="_blank" rel="noopener noreferrer" style={{
               display: 'inline-flex', alignItems: 'center', gap: 7,
               minHeight: 36,
@@ -317,7 +364,7 @@ function GameCard({ game }: { game: GameEvent }) {
               }} />
               WATCH LIVE
             </a>
-          ) : isLive ? (
+          ) : !game.recordingUrl && isLive ? (
             liveBadge
           ) : (
             actionButton
@@ -422,10 +469,16 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
 
   const now    = new Date();
   const parsed = events.map(parseEvent);
-  const cutoff = (e: ReturnType<typeof parseEvent>) =>
-    e.kind === 'game' ? e.data.endDate : e.data.date;
-  const past     = parsed.filter(e => cutoff(e) < now);
-  const upcoming = parsed.filter(e => cutoff(e) >= now);
+  const cutoff = (e: ReturnType<typeof parseEvent>) => {
+    if (e.kind !== 'game') return e.data.date;
+    return new Date(e.data.endDate.getTime() + 30 * 60_000);
+  };
+  const past = parsed.filter(e =>
+    (e.kind === 'game' && !!e.data.recordingUrl) || cutoff(e) < now
+  );
+  const upcoming = parsed.filter(e =>
+    !(e.kind === 'game' && !!e.data.recordingUrl) && cutoff(e) >= now
+  );
 
   const isViewingPast      = page < 0;
   const totalPastPages     = Math.ceil(past.length / perPage);

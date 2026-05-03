@@ -71,7 +71,7 @@ export function parseDescriptionUrls(description?: string): { liveUrl: string | 
   if (!description) return { liveUrl: null, recordingUrl: null };
   let liveUrl: string | null = null;
   let recordingUrl: string | null = null;
-  for (const line of description.split('\n')) {
+  for (const line of description.split(/\n|<br\s*\/?>/i)) {
     const t = line.trim();
     const lm = t.match(/^live\s*:\s*(.+)/i);
     if (lm) { liveUrl = extractUrl(lm[1]); continue; }

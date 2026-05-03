@@ -365,6 +365,27 @@ describe('parseDescriptionUrls', () => {
   it('works when there is no href and URL is plain text (no anchor tag)', () => {
     expect(parseDescriptionUrls('RECORDING: https://youtube.com/watch?v=xyz').recordingUrl).toBe('https://youtube.com/watch?v=xyz');
   });
+
+  it('parses both URLs when lines are separated by <br> instead of newline', () => {
+    const desc = 'LIVE: <a href="https://espn.com/live">https://espn.com/live</a><br>RECORDING: <a href="https://espn.com/vod">https://espn.com/vod</a>';
+    const r = parseDescriptionUrls(desc);
+    expect(r.liveUrl).toBe('https://espn.com/live');
+    expect(r.recordingUrl).toBe('https://espn.com/vod');
+  });
+
+  it('handles <br/> and <BR> variants', () => {
+    const desc = 'LIVE: https://a.com<br/>RECORDING: https://b.com';
+    const r = parseDescriptionUrls(desc);
+    expect(r.liveUrl).toBe('https://a.com');
+    expect(r.recordingUrl).toBe('https://b.com');
+  });
+
+  it('parses the real Google Calendar format with target attribute on anchor', () => {
+    const desc = 'LIVE: <a href="https://espn.com/live" target="_blank">https://espn.com/live</a><br>RECORDING: <a href="https://espn.com/vod">https://espn.com/vod</a>';
+    const r = parseDescriptionUrls(desc);
+    expect(r.liveUrl).toBe('https://espn.com/live');
+    expect(r.recordingUrl).toBe('https://espn.com/vod');
+  });
 });
 
 // ── parseEvent – endDate ──────────────────────────────────────────────────────
