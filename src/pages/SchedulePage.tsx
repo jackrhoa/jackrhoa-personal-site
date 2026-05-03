@@ -173,6 +173,36 @@ function CountdownButton({ href, countdown }: { href: string; countdown: string 
   );
 }
 
+// ── Watch Live button ─────────────────────────────────────────────────────────
+
+function WatchLiveButton({ href }: { href: string }) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" style={{
+      display: 'inline-flex', alignItems: 'center', gap: 7,
+      minHeight: 44,
+      padding: '0 14px',
+      background: 'rgba(255,51,51,0.1)',
+      border: '1px solid rgba(255,51,51,0.45)',
+      borderRadius: 4,
+      color: '#ff4444',
+      fontFamily: 'monospace',
+      fontSize: 12,
+      fontWeight: 'bold',
+      letterSpacing: '0.12em',
+      textDecoration: 'none',
+      whiteSpace: 'nowrap',
+    }}>
+      <span style={{
+        display: 'inline-block', width: 8, height: 8, borderRadius: '50%',
+        background: '#ff3333',
+        animation: 'pulse-red 1.4s ease-in-out infinite',
+        flexShrink: 0,
+      }} />
+      WATCH LIVE
+    </a>
+  );
+}
+
 // ── Action button ─────────────────────────────────────────────────────────────
 
 function ActionButton({ href, label }: { href: string; label: string }) {
@@ -276,7 +306,6 @@ function GameCard({ game }: { game: GameEvent }) {
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <SportBadge sport={game.sport} />
-            {liveBadge}
             <div style={{ color: '#555', fontFamily: 'monospace', fontSize: 9, letterSpacing: '0.1em' }}>POSITION</div>
             <div style={{ color: '#e0e0ff', fontFamily: 'monospace', fontSize: 13, fontWeight: 'bold', letterSpacing: '0.08em', lineHeight: 1.25 }}>{displayPosition}</div>
           </div>
@@ -295,11 +324,22 @@ function GameCard({ game }: { game: GameEvent }) {
           </div>
         </div>
         {/* Row 3: action button + network */}
-        {(actionButton || networkEl) && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
-            <div>{actionButton}</div>
-            {networkEl && <div style={{ marginLeft: 'auto' }}>{networkEl}</div>}
-          </div>
+        {(!game.recordingUrl && isLive && game.liveUrl
+          ? <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+              <WatchLiveButton href={game.liveUrl} />
+              {networkEl && <div style={{ marginLeft: 'auto' }}>{networkEl}</div>}
+            </div>
+          : (!game.recordingUrl && isLive)
+            ? <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+                {liveBadge}
+                {networkEl && <div style={{ marginLeft: 'auto' }}>{networkEl}</div>}
+              </div>
+            : (actionButton || networkEl)
+              ? <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+                  <div>{actionButton}</div>
+                  {networkEl && <div style={{ marginLeft: 'auto' }}>{networkEl}</div>}
+                </div>
+              : null
         )}
       </div>
     );
@@ -339,29 +379,7 @@ function GameCard({ game }: { game: GameEvent }) {
       {(isLive || actionButton) && (
         <div style={{ flexShrink: 0 }}>
           {!game.recordingUrl && isLive && game.liveUrl ? (
-            <a href={game.liveUrl} target="_blank" rel="noopener noreferrer" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 7,
-              minHeight: 36,
-              padding: '0 14px',
-              background: 'rgba(255,51,51,0.1)',
-              border: '1px solid rgba(255,51,51,0.45)',
-              borderRadius: 4,
-              color: '#ff4444',
-              fontFamily: 'monospace',
-              fontSize: 12,
-              fontWeight: 'bold',
-              letterSpacing: '0.12em',
-              textDecoration: 'none',
-              whiteSpace: 'nowrap',
-            }}>
-              <span style={{
-                display: 'inline-block', width: 8, height: 8, borderRadius: '50%',
-                background: '#ff3333',
-                animation: 'pulse-red 1.4s ease-in-out infinite',
-                flexShrink: 0,
-              }} />
-              WATCH LIVE
-            </a>
+            <WatchLiveButton href={game.liveUrl} />
           ) : !game.recordingUrl && isLive ? (
             liveBadge
           ) : (
