@@ -333,7 +333,7 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
   const padding = fullPage
     ? (mobile ? '20px 16px' : '48px 64px')
     : '36px 44px';
-  const allItems = [...past, ...upcoming];
+  const allItems = [...past, ...upcoming].reverse();
   const titleSize = fullPage ? (mobile ? 22 : 36) : 28;
 
   return (
