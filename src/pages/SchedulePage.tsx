@@ -566,7 +566,7 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
 
   return (
     <div ref={containerRef} style={{
-      width: '100%', height: fullPage ? '100vh' : '100%',
+      width: '100%', height: '100%',
       background: BG, padding, boxSizing: 'border-box',
       display: 'flex', flexDirection: 'column', overflow: 'auto',
     }}>

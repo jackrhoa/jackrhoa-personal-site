@@ -13,7 +13,7 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={isMobile ? <MobileApp /> : <App />} />
-        <Route path="/schedule" element={<SchedulePage perPage={7} fullPage />} />
+        <Route path="/schedule" element={<div style={{ height: '100dvh' }}><SchedulePage perPage={7} fullPage /></div>} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
