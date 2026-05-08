@@ -314,7 +314,7 @@ function GameCard({ game }: { game: GameEvent }) {
   const cardBg = (isLive || inWatchBuffer) ? `rgba(232,53,53,0.04)` : SURFACE;
 
   const dateTimeEl = (
-    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+    <div style={{ textAlign: 'right', flexShrink: 0, position: 'relative' }}>
       <div style={{ color: isCanceled ? TEXT_DIM : TEXT_MUTED, fontFamily: MONO, fontSize: mobile ? 10 : 11, letterSpacing: '0.06em', marginBottom: 3 }}>{dateStr}</div>
       <div style={{ color: isCanceled ? TEXT_DIM : ACCENT, fontFamily: MONO, fontSize: mobile ? 15 : 19, fontWeight: 700, letterSpacing: '0.03em' }}>{timeStr}</div>
       {isCanceled && (
