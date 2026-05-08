@@ -274,6 +274,7 @@ function GameCard({ game }: { game: GameEvent }) {
 
   const end30        = new Date(game.endDate.getTime() + 30 * 60_000);
   const end60        = new Date(game.endDate.getTime() + 60 * 60_000);
+  const recordingExpiry = new Date(game.date); recordingExpiry.setMonth(recordingExpiry.getMonth() + 1);
   const inPreStart   = now >= new Date(game.date.getTime() - 5 * 60_000) && now < game.date;
   const isLive       = game.date <= now && now <= game.endDate;
   const inWatchBuffer = now > game.endDate && now <= end30;
@@ -286,7 +287,7 @@ function GameCard({ game }: { game: GameEvent }) {
   const liveBadge = isLive ? <LiveBadge liveUrl={game.liveUrl} /> : null;
 
   const actionButton =
-    game.recordingUrl                                      ? <ActionButton href={game.recordingUrl} label="▶ RECORDING" />
+    game.recordingUrl && now < recordingExpiry             ? <ActionButton href={game.recordingUrl} label="▶ RECORDING" />
     : inPreStart && game.liveUrl                           ? <CountdownButton href={game.liveUrl} countdown={countdown} />
     : (isLive || inWatchBuffer) && game.liveUrl            ? <ActionButton href={game.liveUrl} label="WATCH" />
     : inPastWatch && game.liveUrl                          ? <WatchLiveButton href={game.liveUrl} />
