@@ -1,5 +1,6 @@
 import { initWasm, Resvg } from '@resvg/resvg-wasm';
 import resvgWasm from '@resvg/resvg-wasm/index_bg.wasm';
+import { ACCNX_LOGO_DATA_URI } from './accnxLogo';
 import { parseEvent, CANCELED_REGEX, stripPositionTags } from '../pages/scheduleUtils';
 import type { CalEvent, GameEvent } from '../pages/scheduleUtils';
 import POSITIONS from '../data/positions';
@@ -10,6 +11,15 @@ const CALENDAR_ID = 'e398559c5a1cbfb6b616fe196ad845c4dd30721af94e6c14efb47ad0a44
 const FONT_REGULAR = 'https://cdn.jsdelivr.net/npm/@fontsource/inter@4/files/inter-latin-400-normal.woff2';
 const FONT_BOLD    = 'https://cdn.jsdelivr.net/npm/@fontsource/inter@4/files/inter-latin-700-normal.woff2';
 const UVA_TEAM_ID  = '258';
+
+const ESPN_CDN = 'https://secure.espncdn.com/watchespn/images/channels';
+const NETWORK_LOGOS: Record<string, string> = {
+  'ESPN':  `${ESPN_CDN}/e748f3c0-3f7c-3088-a90a-0ccb2588e0ed.png`,
+  'ESPN2': `${ESPN_CDN}/017f41a2-ef4f-39d3-9f45-f680b88cd23b.png`,
+  'ESPNU': `${ESPN_CDN}/500b1f7c-dad5-33f9-907c-87427babe201.png`,
+  'ACCN':  `${ESPN_CDN}/76b92674-175c-4ff1-8989-380aa514eb87.png`,
+  'ACCNX': ACCNX_LOGO_DATA_URI,
+};
 
 let resvgReady = false;
 let fontBuffers: Uint8Array[] = [];
@@ -68,7 +78,7 @@ function formatDate(date: Date): string {
   return `${datePart} · ${timePart}`;
 }
 
-function logoUrl(id: string): string {
+function teamLogoUrl(id: string): string {
   return `https://a.espncdn.com/i/teamlogos/ncaa/500/${id}.png`;
 }
 
@@ -81,10 +91,8 @@ function buildSvg(game: GameEvent | null, awayTeamId: string | null): string {
   if (!game) {
     return `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
   <rect width="1200" height="630" fill="#0d0d0d"/>
-  <rect width="1200" height="8" fill="#232D4B"/>
-  <rect y="8" width="1200" height="3" fill="#E57200"/>
-  <text x="1160" y="54" font-family="Inter, sans-serif" font-size="20" fill="#444444" text-anchor="end">JACKRHOA.COM</text>
-  <text x="600" y="340" font-family="Inter, sans-serif" font-size="32" fill="#555555" text-anchor="middle">No upcoming games scheduled</text>
+  <text x="600" y="330" font-family="Inter, sans-serif" font-size="32" fill="#555555" text-anchor="middle">No upcoming games scheduled</text>
+  <text x="1140" y="610" font-family="Inter, sans-serif" font-size="18" fill="#333333" text-anchor="end">JACKRHOA.COM</text>
 </svg>`;
   }
 
@@ -92,45 +100,65 @@ function buildSvg(game: GameEvent | null, awayTeamId: string | null): string {
   const sportFull = SPORTS[sport] ?? sport;
   const posAbbrev = stripPositionTags(position);
   const posFull = POSITIONS[posAbbrev] ?? posAbbrev;
-
-  const networkStr = network ? ` · ${network}` : '';
-  const infoLine = `${formatDate(date)}${networkStr} · ${sportFull}`;
+  const dateStr = formatDate(date);
   const awaySize = awayFontSize(awayAbbrev);
+  const networkLogoUrl = network ? (NETWORK_LOGOS[network] ?? null) : null;
 
-  // Layout constants
-  const LOGO_SIZE = 190;
-  const LOGO_Y    = 70;
-  const LEFT_CX   = 240;   // UVA logo center x
-  const RIGHT_CX  = 960;   // Away logo center x
-  const VS_Y      = LOGO_Y + LOGO_SIZE / 2 + 14; // vertical center of logos
-  const NAME_Y    = LOGO_Y + LOGO_SIZE + 82;       // below logos
+  // ── Layout ──────────────────────────────────────────────────────────────────
+  const LOGO_SIZE = 150;
+  const LOGO_Y    = 30;
+  const LEFT_CX   = 240;
+  const RIGHT_CX  = 960;
 
-  const uvaLogoUrl = logoUrl(UVA_TEAM_ID);
-  const awayLogoUrl = awayTeamId ? logoUrl(awayTeamId) : null;
+  // Tricodes sit below the team logos
+  const NAME_Y    = LOGO_Y + LOGO_SIZE + 78; // ~258, baseline
 
-  const uvaImg  = `<image href="${uvaLogoUrl}" x="${LEFT_CX - LOGO_SIZE / 2}" y="${LOGO_Y}" width="${LOGO_SIZE}" height="${LOGO_SIZE}" preserveAspectRatio="xMidYMid meet"/>`;
-  const awayImg = awayLogoUrl
-    ? `<image href="${awayLogoUrl}" x="${RIGHT_CX - LOGO_SIZE / 2}" y="${LOGO_Y}" width="${LOGO_SIZE}" height="${LOGO_SIZE}" preserveAspectRatio="xMidYMid meet"/>`
+  // Network logo centered between the two tricodes, vertically aligned with them
+  const NET_H     = 130;
+  const NET_W     = 210;
+  const NET_CX    = 600;
+
+  // Divider, date, bottom row
+  const DIVIDER_Y = NAME_Y + 68;  // ~326
+  const DATE_Y    = DIVIDER_Y + 105; // ~431, centered x=600
+  const BOTTOM_Y  = 548;
+
+  // ── Team logos ──────────────────────────────────────────────────────────────
+  // Away on left, UVA (home) on right
+  const awayImg = awayTeamId
+    ? `<image href="${teamLogoUrl(awayTeamId)}" x="${LEFT_CX - LOGO_SIZE / 2}" y="${LOGO_Y}" width="${LOGO_SIZE}" height="${LOGO_SIZE}" preserveAspectRatio="xMidYMid meet"/>`
     : '';
+  const uvaImg = `<image href="${teamLogoUrl(UVA_TEAM_ID)}" x="${RIGHT_CX - LOGO_SIZE / 2}" y="${LOGO_Y}" width="${LOGO_SIZE}" height="${LOGO_SIZE}" preserveAspectRatio="xMidYMid meet"/>`;
+
+  // ── Network logo in logo row + @ in tricode row ─────────────────────────────
+  // @ in logo row, network logo in tricode row
+  const atSymbol = `<text x="600" y="${LOGO_Y + LOGO_SIZE / 2 + 22}" font-family="Inter, sans-serif" font-size="80" font-weight="bold" fill="#3a3a3a" text-anchor="middle">@</text>`;
+  const netLogoImg = networkLogoUrl
+    ? `<image href="${networkLogoUrl}" x="${NET_CX - NET_W / 2}" y="${NAME_Y - NET_H * 0.82}" width="${NET_W}" height="${NET_H}" preserveAspectRatio="xMidYMid meet"/>`
+    : network
+      ? `<text x="600" y="${NAME_Y}" font-family="Inter, sans-serif" font-size="38" font-weight="bold" fill="#555555" text-anchor="middle">${escXml(network)}</text>`
+      : '';
 
   return `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
   <rect width="1200" height="630" fill="#0d0d0d"/>
-  <rect width="1200" height="8" fill="#232D4B"/>
-  <rect y="8" width="1200" height="3" fill="#E57200"/>
 
-  <text x="1160" y="54" font-family="Inter, sans-serif" font-size="20" fill="#444444" text-anchor="end">JACKRHOA.COM</text>
-
-  ${uvaImg}
   ${awayImg}
+  ${uvaImg}
 
-  <text x="600" y="${VS_Y}" font-family="Inter, sans-serif" font-size="42" fill="#444444" text-anchor="middle">VS</text>
+  ${netLogoImg}
 
-  <text x="${LEFT_CX}" y="${NAME_Y}" font-family="Inter, sans-serif" font-size="88" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UVA</text>
-  <text x="${RIGHT_CX}" y="${NAME_Y}" font-family="Inter, sans-serif" font-size="${awaySize}" font-weight="bold" fill="#FFFFFF" text-anchor="middle">${escXml(awayAbbrev)}</text>
+  <text x="${LEFT_CX}" y="${NAME_Y}" font-family="Inter, sans-serif" font-size="${awaySize}" font-weight="bold" fill="#FFFFFF" text-anchor="middle">${escXml(awayAbbrev)}</text>
+  ${atSymbol}
+  <text x="${RIGHT_CX}" y="${NAME_Y}" font-family="Inter, sans-serif" font-size="82" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UVA</text>
 
-  <text x="600" y="520" font-family="Inter, sans-serif" font-size="26" fill="#888888" text-anchor="middle">${escXml(infoLine)}</text>
+  <line x1="60" y1="${DIVIDER_Y}" x2="1140" y2="${DIVIDER_Y}" stroke="#1e1e1e" stroke-width="1.5"/>
 
-  <text x="1160" y="600" font-family="Inter, sans-serif" font-size="18" fill="#555555" text-anchor="end">${escXml(posFull)}</text>
+  <text x="600" y="${DATE_Y}" font-family="Inter, sans-serif" font-size="54" font-weight="bold" fill="#e0e0e0" text-anchor="middle">${escXml(dateStr)}</text>
+
+  <text x="60" y="${BOTTOM_Y}" font-family="Inter, sans-serif" font-size="44" font-weight="bold" fill="#5a5a5a" text-anchor="start">${escXml(sportFull)}</text>
+  <text x="1140" y="${BOTTOM_Y}" font-family="Inter, sans-serif" font-size="44" font-weight="bold" fill="#ffffff" text-anchor="end">${escXml(posFull)}</text>
+
+  <text x="1140" y="612" font-family="Inter, sans-serif" font-size="18" fill="#2a2a2a" text-anchor="end">JACKRHOA.COM</text>
 </svg>`;
 }
 
@@ -145,13 +173,13 @@ export async function generateOgImage(apiKey: string): Promise<Response> {
       font: { fontBuffers, defaultFontFamily: 'Inter', loadSystemFonts: false },
     });
 
-    // Resolve external images (team logos)
+    // Resolve external images (team logos + network logo)
     const hrefs = resvg.imagesToResolve();
     await Promise.all(hrefs.map(async (href) => {
       try {
         const res = await fetch(href);
         if (res.ok) resvg.resolveImage(href, new Uint8Array(await res.arrayBuffer()));
-      } catch { /* skip failed logos gracefully */ }
+      } catch { /* skip failed images gracefully */ }
     }));
 
     const png = resvg.render().asPng();
