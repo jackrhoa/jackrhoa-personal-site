@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+.sched-card {
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.sched-card:hover {
+  background: rgba(255, 255, 255, 0.038) !important;
+}
+
+.sched-nav {
+  transition: background 0.1s ease, border-color 0.1s ease, color 0.1s ease;
+}
+.sched-nav:not(:disabled):hover {
+  background: rgba(91, 130, 255, 0.14) !important;
+  border-color: rgba(91, 130, 255, 0.5) !important;
+}
+
+.sched-btn {
+  transition: background 0.1s ease, border-color 0.1s ease;
+}
+.sched-btn:hover {
+  background: rgba(91, 130, 255, 0.2) !important;
+  border-color: rgba(91, 130, 255, 0.55) !important;
+}
+
+.sched-watch-btn {
+  transition: background 0.1s ease, border-color 0.1s ease;
+}
+.sched-watch-btn:hover {
+  background: rgba(232, 53, 53, 0.2) !important;
+  border-color: rgba(232, 53, 53, 0.7) !important;
+}
+
+.sched-toggle {
+  transition: background 0.1s ease, border-color 0.1s ease, color 0.1s ease;
+}
+.sched-toggle:hover {
+  background: rgba(91, 130, 255, 0.1) !important;
+  border-color: rgba(91, 130, 255, 0.45) !important;
+  color: #c8d4f0 !important;
+}
+
+@keyframes sched-dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(232, 53, 53, 0.5); }
+  50%       { opacity: 0.7; transform: scale(0.8); box-shadow: 0 0 0 4px rgba(232, 53, 53, 0); }
+}
+.sched-live-dot {
+  animation: sched-dot-pulse 1.4s ease-in-out infinite;
+}
