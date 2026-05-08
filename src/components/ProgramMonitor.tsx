@@ -62,13 +62,7 @@ export default function ProgramMonitor({ source, previewSource, crossfadeOpacity
         </div>
       )}
 
-      {/* ON AIR badge */}
-      <div className="absolute top-3 left-3 flex items-center gap-2 px-3 py-1 rounded" style={{ background: 'rgba(0,0,0,0.75)', zIndex: 10 }}>
-        <span className="on-air-pulse inline-block w-2.5 h-2.5 rounded-full bg-red-500" />
-        <span className="text-xs font-bold tracking-widest text-red-400">ON AIR</span>
-      </div>
-
-      {/* Source label */}
+{/* Source label */}
       <div data-testid="program-label" className="absolute bottom-3 left-3 px-2 py-0.5 rounded text-xs tracking-widest" style={{ background: 'rgba(0,0,0,0.75)', zIndex: 10 }}>
         {source.label}
       </div>
