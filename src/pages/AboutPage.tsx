@@ -1,5 +1,7 @@
 import headshot from '../assets/headshot.png';
 
+const isMobile = () => window.innerWidth < 768;
+
 export default function AboutPage() {
   return (
     <div style={{
@@ -15,16 +17,11 @@ export default function AboutPage() {
         </div>
         <div style={{ maxWidth: '600px', textAlign: 'left', fontSize: '18px', lineHeight: 1.7 }}>
           <p style={{ marginBottom: '20px' }}>
-            My name is Jack Rhoa, and I'm in my third year the University of Virginia student. Currently, my interests lie in backend development as well as data analysis and modeling.
-          </p>
-          <p style={{ marginBottom: '20px' }}>
-            Many of the problems I address are ones encountered in my everyday life, which has given me experience in various things like Google Apps Script, Monkey C, Visual Basic, ogScript, and more.
-          </p>
-          <p style={{ marginBottom: '20px' }}>
-            My backend experience is mostly with Django, a Python-based framework, while I've used React (with TypeScript!) to build the frontends.
+            I'm a third year at the University of Virginia who builds random stuff, mostly based on things in my everyday life. Tools and products I've used include Google Apps Script, Monkey C, ogScript, and more.
           </p>
           <p>
             In my free time, I enjoy serving as tech director for sports broadcasts as well as directing various lacrosse, baseball, and softball games, all on the ESPN app.
+            {isMobile() && <>{' '}<a href="/schedule" style={{ color: '#3b82f6' }}>Check out all the games I work.</a></>}
           </p>
         </div>
       </div>
