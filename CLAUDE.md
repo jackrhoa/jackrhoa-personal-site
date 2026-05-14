@@ -21,3 +21,12 @@ Vite + React + TypeScript. Desktop: Ross Carbonite ME1 switcher as navigation. M
 
 ## Changing existing page content
 Page components in `src/pages/` are shared — one change applies to both desktop and mobile.
+
+## Deployment
+**Do not run `wrangler deploy` manually.** Deployment happens automatically via git push — let the user push when ready.
+
+## Image conversion
+To convert SVG to PNG, use `sips` — macOS Preview and other built-in tools don't work reliably for this:
+```
+sips -s format png input.svg --out output.png
+```

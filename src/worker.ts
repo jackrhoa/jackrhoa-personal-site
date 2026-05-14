@@ -13,6 +13,7 @@ const BOT_PATTERNS = [
   'whatsapp',
   'telegrambot',
   'discordbot',
+  'applebot',
 ];
 
 function isSocialBot(request: Request): boolean {
@@ -25,7 +26,7 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === '/og/schedule') {
-      return generateOgImage(env.GOOGLE_CALENDAR_API_KEY);
+      return generateOgImage(env.GOOGLE_CALENDAR_API_KEY, request);
     }
 
     if (url.pathname === '/schedule' && isSocialBot(request)) {

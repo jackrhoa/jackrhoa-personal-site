@@ -162,7 +162,11 @@ function buildSvg(game: GameEvent | null, awayTeamId: string | null): string {
 </svg>`;
 }
 
-export async function generateOgImage(apiKey: string): Promise<Response> {
+export async function generateOgImage(apiKey: string, request: Request): Promise<Response> {
+  const cache: Cache = (caches as unknown as { default: Cache }).default;
+  const cached = await cache.match(request);
+  if (cached) return cached;
+
   try {
     await ensureInit();
     const game = await fetchNextGame(apiKey);
@@ -183,12 +187,14 @@ export async function generateOgImage(apiKey: string): Promise<Response> {
     }));
 
     const png = resvg.render().asPng();
-    return new Response(png.buffer as ArrayBuffer, {
+    const response = new Response(png.buffer as ArrayBuffer, {
       headers: {
         'Content-Type': 'image/png',
         'Cache-Control': 'public, max-age=300',
       },
     });
+    await cache.put(request, response.clone());
+    return response;
   } catch (err) {
     console.error('OG image generation failed:', err);
     return new Response('Image generation failed', { status: 500 });
