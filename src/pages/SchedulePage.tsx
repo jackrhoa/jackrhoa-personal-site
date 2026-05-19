@@ -8,8 +8,6 @@ import {
 } from './scheduleUtils';
 import './SchedulePage.css';
 
-const CALENDAR_ID = 'e398559c5a1cbfb6b616fe196ad845c4dd30721af94e6c14efb47ad0a4488993@group.calendar.google.com';
-const API_KEY = import.meta.env.VITE_GOOGLE_CALENDAR_API_KEY as string;
 const CACHE_TTL = 5 * 60 * 1000;
 
 const BG          = '#07090e';
@@ -508,10 +506,8 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
     const tMin = new Date(); tMin.setFullYear(tMin.getFullYear() - 1);
     const tMax = new Date(); tMax.setFullYear(tMax.getFullYear() + 2);
     const url =
-      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events` +
-      `?key=${API_KEY}&timeMin=${encodeURIComponent(tMin.toISOString())}` +
-      `&timeMax=${encodeURIComponent(tMax.toISOString())}` +
-      `&maxResults=500&singleEvents=true&orderBy=startTime`;
+      `/api/calendar?timeMin=${encodeURIComponent(tMin.toISOString())}` +
+      `&timeMax=${encodeURIComponent(tMax.toISOString())}`;
     fetch(url)
       .then(r => r.json())
       .then(data => { cachedEvents = data.items ?? []; cacheTime = Date.now(); setEvents(cachedEvents!); setLoading(false); })
