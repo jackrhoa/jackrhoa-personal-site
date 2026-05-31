@@ -10,7 +10,7 @@ export default function HomePage() {
       boxSizing: 'border-box',
     }}>
       <h1 style={{ fontSize: '80px', margin: '0 0 40px', fontWeight: 'normal' }}>
-        Hi! I'm Jack
+        I'm Jack
       </h1>
       <h2 style={{ fontSize: '36px', fontWeight: 'normal', margin: '0 0 60px', lineHeight: 1.3, maxWidth: '800px' }}>
         A Computer Science student at the University of Virginia
