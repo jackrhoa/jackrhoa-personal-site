@@ -22,8 +22,8 @@ const TEXT_MUTED  = '#4a5570';
 const TEXT_DIM    = '#2a3048';
 const SURFACE     = 'rgba(255,255,255,0.025)';
 const BORDER      = 'rgba(255,255,255,0.07)';
-const MONO        = "'JetBrains Mono', 'Courier New', monospace";
-const DISPLAY     = "'Barlow Condensed', sans-serif";
+const MONO        = "monospace";
+const DISPLAY     = "sans-serif";
 
 function useMobile() {
   const [mobile, setMobile] = useState(() => window.innerWidth < 768);
