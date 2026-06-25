@@ -5,8 +5,8 @@ import MobileApp from '../../MobileApp';
 describe('MobileApp tab navigation', () => {
   it('renders the HOME tab by default', () => {
     render(<MobileApp />);
-    // Home page contains "Hi! I'm Jack"
-    expect(screen.getByText(/Hi! I'm Jack/i)).toBeInTheDocument();
+    // Home page contains "I'm Jack"
+    expect(screen.getByText(/I'm Jack/i)).toBeInTheDocument();
   });
 
   it('all four nav tabs are visible', () => {
@@ -54,6 +54,6 @@ describe('MobileApp tab navigation', () => {
     render(<MobileApp />);
     fireEvent.click(screen.getByRole('button', { name: 'ABOUT' }));
     fireEvent.click(screen.getByRole('button', { name: 'HOME' }));
-    expect(screen.getByText(/Hi! I'm Jack/i)).toBeInTheDocument();
+    expect(screen.getByText(/I'm Jack/i)).toBeInTheDocument();
   });
 });
