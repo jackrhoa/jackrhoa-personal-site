@@ -9,9 +9,10 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "preview": "npm run build && wrangler dev",
-    "deploy": "npm run build && wrangler deploy"
+    "preview": "pnpm build && wrangler dev",
+    "deploy": "pnpm build && wrangler deploy"
   },
+  "packageManager": "pnpm@11.9.0",
   "dependencies": {
     "@resvg/resvg-wasm": "^2.6.2",
     "@tailwindcss/vite": "^4.2.4",
