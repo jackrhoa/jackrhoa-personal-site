@@ -18,8 +18,8 @@ const LIVE_RED    = '#e83535';
 const LIVE_DIM    = 'rgba(232,53,53,0.09)';
 const LIVE_RING   = 'rgba(232,53,53,0.32)';
 const TEXT        = '#c8d4f0';
-const TEXT_MUTED  = '#4a5570';
 const TEXT_DIM    = '#2a3048';
+const MUTED_SLATE = '#8791ab';
 const SURFACE     = 'rgba(255,255,255,0.025)';
 const BORDER      = 'rgba(255,255,255,0.07)';
 const MONO        = "monospace";
@@ -108,7 +108,7 @@ function NetworkBadge({ network, mobile = false }: { network: string; mobile?: b
   }
   return (
     <span style={{
-      color: TEXT_MUTED,
+      color: MUTED_SLATE,
       fontFamily: MONO,
       fontSize: mobile ? 10 : 12,
       fontWeight: 700,
@@ -128,12 +128,12 @@ function SportBadge({ sport }: { sport: string }) {
   const label = SPORTS[sport] ?? sport;
   return (
     <span style={{
-      color: TEXT_MUTED,
+      color: MUTED_SLATE,
       fontFamily: MONO,
       fontSize: 10,
       fontWeight: 700,
       letterSpacing: '0.12em',
-      border: `1px solid rgba(74,85,112,0.5)`,
+      border: `1px solid rgba(135,145,171,0.5)`,
       borderRadius: 3,
       padding: '2px 7px',
       whiteSpace: 'nowrap',
@@ -314,7 +314,7 @@ function GameCard({ game }: { game: GameEvent }) {
 
   const dateTimeEl = (
     <div style={{ textAlign: 'right', flexShrink: 0, position: 'relative' }}>
-      <div style={{ color: isCanceled ? TEXT_DIM : TEXT_MUTED, fontFamily: MONO, fontSize: mobile ? 10 : 11, letterSpacing: '0.06em', marginBottom: 3 }}>{dateStr}</div>
+      <div style={{ color: isCanceled ? TEXT_DIM : MUTED_SLATE, fontFamily: MONO, fontSize: mobile ? 10 : 11, letterSpacing: '0.06em', marginBottom: 3 }}>{dateStr}</div>
       <div style={{ color: isCanceled ? TEXT_DIM : ACCENT, fontFamily: MONO, fontSize: mobile ? 15 : 19, fontWeight: 700, letterSpacing: '0.03em' }}>{timeStr}</div>
       {isCanceled && (
         <>
@@ -351,8 +351,8 @@ function GameCard({ game }: { game: GameEvent }) {
           <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
             <TeamLogo abbrev={game.awayAbbrev} sport={game.sport} size={28} wrap />
           </div>
-          <span style={{ color: TEXT_DIM, fontFamily: MONO, fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
-            {game.neutral ? 'VS' : '@'}
+          <span aria-label="at" style={{ color: MUTED_SLATE, fontFamily: MONO, fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
+            @
           </span>
           <div style={{ flex: 1 }}>
             <TeamLogo abbrev={game.homeAbbrev} sport={game.sport} size={28} wrap reverse />
@@ -393,7 +393,7 @@ function GameCard({ game }: { game: GameEvent }) {
     }}>
       {/* Position */}
       <div style={{ flexShrink: 0, width: 110, textAlign: 'center' }}>
-        <div style={{ color: TEXT_MUTED, fontFamily: MONO, fontSize: 9, letterSpacing: '0.14em', marginBottom: 3 }}>ROLE</div>
+        <div style={{ color: MUTED_SLATE, fontFamily: MONO, fontSize: 9, letterSpacing: '0.14em', marginBottom: 3 }}>ROLE</div>
         <div style={{ color: TEXT, fontFamily: MONO, fontSize: 14, fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1.25 }}>{displayPosition}</div>
       </div>
 
@@ -408,8 +408,8 @@ function GameCard({ game }: { game: GameEvent }) {
       {/* Matchup */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1, minWidth: 0, justifyContent: 'center' }}>
         <TeamLogo abbrev={game.awayAbbrev} sport={game.sport} size={42} />
-        <span style={{ color: TEXT_DIM, fontFamily: MONO, fontSize: 18, fontWeight: 700, flexShrink: 0 }}>
-          {game.neutral ? 'VS' : '@'}
+        <span aria-label="at" style={{ color: MUTED_SLATE, fontFamily: MONO, fontSize: 18, fontWeight: 700, flexShrink: 0 }}>
+          @
         </span>
         <TeamLogo abbrev={game.homeAbbrev} sport={game.sport} size={42} reverse />
       </div>
@@ -450,8 +450,8 @@ function RawCard({ evt }: { evt: UnparsedEvent }) {
       borderLeft: `3px solid rgba(74,85,112,0.35)`,
       borderRadius: 5,
     }}>
-      <span style={{ color: TEXT_MUTED, fontFamily: MONO, fontSize: mobile ? 10 : 11, minWidth: mobile ? 0 : 110, letterSpacing: '0.06em' }}>{dateStr}</span>
-      <span style={{ color: 'rgba(200,212,240,0.45)', fontFamily: MONO, fontSize: mobile ? 13 : 14 }}>{evt.raw}</span>
+      <span style={{ color: MUTED_SLATE, fontFamily: MONO, fontSize: mobile ? 10 : 11, minWidth: mobile ? 0 : 110, letterSpacing: '0.06em' }}>{dateStr}</span>
+      <span style={{ color: 'rgba(200,212,240,0.75)', fontFamily: MONO, fontSize: mobile ? 13 : 14 }}>{evt.raw}</span>
     </div>
   );
 }
@@ -463,7 +463,7 @@ function NavButton({ onClick, disabled, children }: { onClick: () => void; disab
     <button onClick={onClick} disabled={disabled} className="sched-nav" style={{
       background: 'none',
       border: `1px solid ${disabled ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.12)'}`,
-      color: disabled ? TEXT_DIM : TEXT_MUTED,
+      color: disabled ? TEXT_DIM : MUTED_SLATE,
       fontFamily: MONO,
       fontSize: 16,
       width: 36, height: 36,
@@ -516,7 +516,7 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
 
   if (loading) return (
     <div style={{ width: '100%', height: '100%', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <span style={{ color: TEXT_MUTED, fontFamily: MONO, fontSize: 13, letterSpacing: '0.2em' }}>LOADING…</span>
+      <span style={{ color: MUTED_SLATE, fontFamily: MONO, fontSize: 13, letterSpacing: '0.2em' }}>LOADING…</span>
     </div>
   );
 
@@ -553,7 +553,7 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
   const canGoPrev  = page > -totalPastPages;
   const canGoNext  = page < totalUpcomingPages - 1;
   const label      = isViewingPast ? 'PAST GAMES' : 'UPCOMING SCHEDULE';
-  const titleColor = isViewingPast ? TEXT_MUTED : TEXT;
+  const titleColor = isViewingPast ? MUTED_SLATE : TEXT;
 
   const padding = fullPage
     ? (mobile ? '20px 16px' : '48px 64px')
@@ -609,7 +609,7 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
               marginLeft: 'auto',
               background: showAll ? ACCENT_DIM : 'none',
               border: `1px solid ${showAll ? ACCENT_RING : 'rgba(255,255,255,0.1)'}`,
-              color: showAll ? ACCENT : TEXT_MUTED,
+              color: showAll ? ACCENT : MUTED_SLATE,
               fontFamily: MONO,
               fontSize: mobile ? 10 : 11,
               letterSpacing: '0.12em',
@@ -625,7 +625,7 @@ export default function SchedulePage({ perPage = 3, fullPage = false }: { perPag
 
       {/* Content */}
       {(showAll ? allItems : pageItems).length === 0 ? (
-        <div style={{ color: TEXT_MUTED, fontFamily: MONO, fontSize: mobile ? 13 : 15, letterSpacing: '0.12em' }}>
+        <div style={{ color: MUTED_SLATE, fontFamily: MONO, fontSize: mobile ? 13 : 15, letterSpacing: '0.12em' }}>
           {isViewingPast ? 'NO PAST GAMES' : 'NO UPCOMING EVENTS'}
         </div>
       ) : (
