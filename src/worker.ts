@@ -21,7 +21,7 @@ function isSocialBot(request: Request): boolean {
   return BOT_PATTERNS.some(p => ua.includes(p));
 }
 
-const CALENDAR_ID = 'e398559c5a1cbfb6b616fe196ad845c4dd30721af94e6c14efb47ad0a4488993@group.calendar.google.com';
+const CALENDAR_ID = '7e2c6dfa4e2df80f152afadb1acca09030360115a5c3439e89daa557a1445828@group.calendar.google.com';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
