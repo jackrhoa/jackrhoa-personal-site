@@ -7,7 +7,7 @@ import POSITIONS from '../data/positions';
 import SPORTS from '../data/sports';
 import TEAMS from '../data/teams';
 
-const CALENDAR_ID = 'e398559c5a1cbfb6b616fe196ad845c4dd30721af94e6c14efb47ad0a4488993@group.calendar.google.com';
+const CALENDAR_ID = '7e2c6dfa4e2df80f152afadb1acca09030360115a5c3439e89daa557a1445828@group.calendar.google.com';
 const FONT_REGULAR = 'https://cdn.jsdelivr.net/npm/@fontsource/inter@4/files/inter-latin-400-normal.woff2';
 const FONT_BOLD    = 'https://cdn.jsdelivr.net/npm/@fontsource/inter@4/files/inter-latin-700-normal.woff2';
 const UVA_TEAM_ID  = '258';
