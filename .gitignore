@@ -30,3 +30,9 @@ dist-ssr
 .dev.vars*
 !.dev.vars.example
 !.env.example
+
+infra/.terraform
+*.tfstate
+*.tfstate.*
+.direnv
+tfplan

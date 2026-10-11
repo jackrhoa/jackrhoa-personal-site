@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "jackrhoa-switcher-emulator-site",
+  "account_id": "59bb44f2e2fbd89a6c9ef05e9e168132",
   "main": "src/worker.ts",
   "compatibility_date": "2026-05-02",
   "workers_dev": false,
