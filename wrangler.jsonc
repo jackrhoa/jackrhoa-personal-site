@@ -3,6 +3,12 @@
   "name": "jackrhoa-switcher-emulator-site",
   "main": "src/worker.ts",
   "compatibility_date": "2026-05-02",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "jackrhoa.com", "custom_domain": true },
+    { "pattern": "www.jackrhoa.com", "custom_domain": true }
+  ],
   "observability": {
     "enabled": true
   },
