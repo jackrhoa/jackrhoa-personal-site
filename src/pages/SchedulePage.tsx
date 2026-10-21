@@ -267,7 +267,8 @@ function GameCard({ game }: { game: GameEvent }) {
     return () => clearInterval(id);
   }, []);
 
-  const timeStr = game.date ? game.date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+  const isMidnight = game.date && game.date.getHours() === 0 && game.date.getMinutes() === 0;
+  const timeStr = !game.date ? '' : isMidnight ? 'TBA' : game.date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   const dateStr = game.date ? game.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
 
   const end30        = new Date(game.endDate.getTime() + 30 * 60_000);
