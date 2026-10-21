@@ -37,6 +37,11 @@ describe('normalizeSport', () => {
     expect(normalizeSport('baseball')).toBe('BASE');
   });
 
+  it('maps aliases to their abbreviations', () => {
+    expect(normalizeSport('FH')).toBe('FHOC');
+    expect(normalizeSport('fh')).toBe('FHOC');
+  });
+
   it('returns the input unchanged when sport is unrecognized', () => {
     expect(normalizeSport('ESPORTS')).toBe('ESPORTS');
     expect(normalizeSport('unknownsport')).toBe('UNKNOWNSPORT');

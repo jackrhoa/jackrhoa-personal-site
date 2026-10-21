@@ -41,8 +41,13 @@ export const SPORT_REVERSE: Record<string, string> = Object.fromEntries(
   Object.entries(SPORTS).map(([abbrev, name]) => [name.toUpperCase(), abbrev])
 );
 
+const SPORT_ALIASES: Record<string, string> = {
+  FH: 'FHOC',
+};
+
 export function normalizeSport(raw: string): string {
-  const upper = raw.trim().toUpperCase();
+  const trimmed = raw.trim().toUpperCase();
+  const upper = SPORT_ALIASES[trimmed] ?? trimmed;
   if (SPORTS[upper] !== undefined) return upper;
   return SPORT_REVERSE[upper] ?? upper;
 }
