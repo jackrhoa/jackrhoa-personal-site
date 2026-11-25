@@ -11,7 +11,7 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/schedule" element={<div style={{ height: '100dvh' }}><SchedulePage perPage={7} fullPage /></div>} />
+        <Route path="/schedule" element={<div style={{ height: '100dvh' }}><SchedulePage perPage={7} /></div>} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
