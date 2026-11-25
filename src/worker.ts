@@ -21,6 +21,8 @@ function isSocialBot(request: Request): boolean {
   return BOT_PATTERNS.some(p => ua.includes(p));
 }
 
+const SPA_ROUTES = new Set(['/', '/schedule']);
+
 const CALENDAR_ID = '7e2c6dfa4e2df80f152afadb1acca09030360115a5c3439e89daa557a1445828@group.calendar.google.com';
 
 export default {
@@ -57,6 +59,14 @@ export default {
       });
     }
 
-    return env.ASSETS.fetch(request);
+    const response = await env.ASSETS.fetch(request);
+    if (response.status !== 404) {
+      return response;
+    }
+    const index = await env.ASSETS.fetch(new Request(new URL('/', url), request));
+    return new Response(index.body, {
+      status: SPA_ROUTES.has(url.pathname) ? 200 : 404,
+      headers: index.headers,
+    });
   },
 };
