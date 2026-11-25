@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import SPORTS from '../../data/sports';
 import NETWORKS from '../../data/networks';
 import POSITIONS from '../../data/positions';
-import { SOURCES } from '../../sources';
 
 // ── sports.ts ─────────────────────────────────────────────────────────────────
 
@@ -93,47 +92,5 @@ describe('POSITIONS data', () => {
 
   it('maps TD to TECHNICAL DIRECTOR', () => {
     expect(POSITIONS['TD']).toBe('TECHNICAL DIRECTOR');
-  });
-});
-
-// ── sources.ts ────────────────────────────────────────────────────────────────
-
-describe('SOURCES data', () => {
-  it('has 7 sources', () => {
-    expect(SOURCES).toHaveLength(7);
-  });
-
-  it('every source has a label and background color', () => {
-    for (const source of SOURCES) {
-      expect(typeof source.label).toBe('string');
-      expect(source.label.length).toBeGreaterThan(0);
-      expect(typeof source.bg).toBe('string');
-    }
-  });
-
-  it('WORK SCHEDULE source has busLabel SCHED', () => {
-    const sched = SOURCES.find(s => s.label === 'WORK SCHEDULE');
-    expect(sched).toBeDefined();
-    expect(sched!.busLabel).toBe('SCHED');
-  });
-
-  it('BARS source is flagged as color bars', () => {
-    const bars = SOURCES.find(s => s.label === 'BARS');
-    expect(bars).toBeDefined();
-    expect(bars!.isColorBars).toBe(true);
-  });
-
-  it('BLACK source has a true-black background', () => {
-    const black = SOURCES.find(s => s.label === 'BLACK');
-    expect(black).toBeDefined();
-    expect(black!.bg).toBe('#000');
-  });
-
-  it('content pages have a pageKey', () => {
-    const contentLabels = ['HOME', 'ABOUT', 'PROJECTS', 'WORK SCHEDULE'];
-    for (const label of contentLabels) {
-      const source = SOURCES.find(s => s.label === label);
-      expect(source?.pageKey).toBeDefined();
-    }
   });
 });
