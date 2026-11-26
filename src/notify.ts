@@ -1,8 +1,33 @@
 const METHOD_NAMES: Record<string, string> = {
-  'private-access-token': 'Apple Private Access Token',
+  'private-access-token': 'Apple PAT',
   turnstile: 'Cloudflare Turnstile',
-  webauthn: 'Hardware key attestation',
+  webauthn: 'Hardware Key',
 };
+
+const COUNTRY_NAMES = new Intl.DisplayNames(['en'], { type: 'region' });
+
+function countryName(code: string): string {
+  try {
+    return COUNTRY_NAMES.of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
+
+function easternTime(iso: string): string {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    }).formatToParts(new Date(iso)).map(p => [p.type, p.value]),
+  );
+  return `${parts.weekday}, ${parts.month} ${parts.day} at ${parts.hour}:${parts.minute} ${parts.dayPeriod} ${parts.timeZoneName}`;
+}
 
 interface CfProperties {
   city?: string;
@@ -68,16 +93,15 @@ export function unlockDetails(request: Request, unlock: Unlock, now = new Date()
 }
 
 export function describeUnlock(d: UnlockDetails): string {
-  const place = [d.city, d.region, d.postalCode, d.country].filter(Boolean).join(', ') || 'unknown';
-  const coords = d.latitude !== null && d.longitude !== null ? ` (${d.latitude}, ${d.longitude})` : '';
-  const network = d.asOrganization ? `${d.asOrganization}${d.asn ? ` (AS${d.asn})` : ''}` : 'unknown';
+  const method = METHOD_NAMES[d.method] ?? d.method;
+  const place = [d.city, d.region, d.country && countryName(d.country)].filter(Boolean).join(', ') || 'unknown';
+  const as = d.asn ? `${d.asn}${d.asOrganization ? ` (${d.asOrganization})` : ''}` : d.asOrganization ?? 'unknown';
 
   return [
-    `Method: ${METHOD_NAMES[d.method] ?? d.method}`,
-    ...(d.device ? [`Device: ${d.device}`] : []),
-    `Time: ${d.createdAt}${d.timezone ? ` (visitor timezone ${d.timezone})` : ''}`,
-    `Location: ${place}${coords}`,
-    `Network: ${network}`,
+    `Method: ${method}${d.device ? ` (${d.device})` : ''}`,
+    `Location: ${place}`,
+    `Time: ${easternTime(d.createdAt)}`,
+    `AS: ${as}`,
     `IP: ${d.ip ?? 'unknown'}`,
     `Browser: ${d.userAgent ?? 'unknown'}`,
   ].join('\n');
@@ -85,7 +109,7 @@ export function describeUnlock(d: UnlockDetails): string {
 
 export async function notifyUnlock(d: UnlockDetails, ntfyUrl: string, ntfyToken?: string): Promise<void> {
   const headers: Record<string, string> = {
-    Title: 'Someone revealed your email',
+    Title: 'Email Revealed',
     Tags: 'unlock',
   };
   if (ntfyToken) headers.Authorization = `Bearer ${ntfyToken}`;
