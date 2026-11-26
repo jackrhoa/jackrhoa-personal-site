@@ -21,7 +21,8 @@ const METHOD_LABELS: Record<string, string> = {
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
 const TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
-const webauthnSupported = typeof PublicKeyCredential !== 'undefined'
+const webauthnSupported = import.meta.env.VITE_ENABLE_HARDWARE_KEY === 'true'
+  && typeof PublicKeyCredential !== 'undefined'
   && typeof PublicKeyCredential.parseCreationOptionsFromJSON === 'function';
 
 let turnstileScript: Promise<void> | null = null;
