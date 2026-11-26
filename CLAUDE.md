@@ -13,6 +13,10 @@ New routes must be added to both `src/main.tsx` and `SPA_ROUTES` in `src/worker.
 - `POST {token}` verifies Turnstile via siteverify (secret `TURNSTILE_SECRET_KEY`, action `email`, hostname allowlist)
 - Local dev: copy `.dev.vars.example` to `.dev.vars` (Turnstile always-pass test keys)
 
+## Infra (`infra/`)
+- OpenTofu for this app only (GitHub environment/ruleset, Turnstile widget). Shared infra not tied to this app lives in the separate `jackrhoa/infra` repo
+- `turnstile.tf` creates the widget and writes its site key to the `production` environment variable `TURNSTILE_SITE_KEY`, which `deploy.yml` passes to the build as `VITE_TURNSTILE_SITE_KEY`
+
 ## Deployment
 **Do not run `wrangler deploy` manually.** Deployment happens automatically via git push — let the user push when ready.
 
