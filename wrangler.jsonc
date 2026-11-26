@@ -13,6 +13,14 @@
   "observability": {
     "enabled": true
   },
+  "d1_databases": [
+    {
+      "binding": "UNLOCKS_DB",
+      "database_name": "jackrhoa-unlocks",
+      "database_id": "333f8b74-f1d1-4092-b798-42470f533cba",
+      "migrations_dir": "migrations"
+    }
+  ],
   "assets": {
     "binding": "ASSETS",
     "not_found_handling": "none"

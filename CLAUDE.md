@@ -13,6 +13,11 @@ New routes must be added to both `src/main.tsx` and `SPA_ROUTES` in `src/worker.
 - `POST {token}` verifies Turnstile via siteverify (secret `TURNSTILE_SECRET_KEY`, action `email`, hostname allowlist)
 - Local dev: copy `.dev.vars.example` to `.dev.vars` (Turnstile always-pass test keys)
 
+## Unlock notifications and log
+- `src/notify.ts`: on every successful reveal the worker (in `waitUntil`, never blocking the response) sends an ntfy push (`NTFY_URL` secret, optional `NTFY_TOKEN`) and inserts a row into D1 (`UNLOCKS_DB` binding, table `unlocks` from `migrations/`)
+- Each is skipped when its secret/binding is missing. Rows contain IP, location and user agent: treat as personal data
+- D1 database is created in `infra/d1.tf`; apply migrations with `pnpm wrangler d1 migrations apply jackrhoa-unlocks --remote`
+
 ## Hardware key metadata
 - `src/data/mdsStatements.json` is a verified, trimmed FIDO Metadata Service snapshot used by `src/webauthnGate.ts` (strict mode: unknown models are rejected)
 - Endpoint is `/api/email/key`. Never put "webauthn" in a URL path: Cloudflare's edge challenges any such path before it reaches the worker

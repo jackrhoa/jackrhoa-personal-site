@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "preview": "pnpm build && wrangler dev",
-    "deploy": "pnpm build && wrangler deploy"
+    "deploy": "pnpm build && wrangler deploy",
+    "secret": "sh scripts/secret.sh"
   },
   "packageManager": "pnpm@12.17.0",
   "dependencies": {
