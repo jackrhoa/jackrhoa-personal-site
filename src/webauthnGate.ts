@@ -2,10 +2,12 @@ import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
   MetadataService,
+  type MetadataStatement,
   type RegistrationResponseJSON,
 } from '@simplewebauthn/server';
 import { decodeAttestationObject } from '@simplewebauthn/server/helpers';
 import { ALLOWED_HOSTNAMES, noStore, unlocked } from './emailGate';
+import mds from './data/mdsStatements.json';
 
 const CHALLENGE_TTL_MS = 5 * 60 * 1000;
 const VERIFIED_FORMATS = new Set(['packed', 'tpm', 'android-key', 'apple']);
@@ -17,7 +19,11 @@ let metadataReady: Promise<void> | null = null;
 
 function initMetadata(): Promise<void> {
   if (!metadataReady) {
-    metadataReady = MetadataService.initialize({ verificationMode: 'strict' }).catch(err => {
+    metadataReady = MetadataService.initialize({
+      statements: mds.statements as unknown as MetadataStatement[],
+      mdsServers: [],
+      verificationMode: 'strict',
+    }).catch(err => {
       metadataReady = null;
       throw err;
     });
