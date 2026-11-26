@@ -18,7 +18,7 @@ const METHOD_LABELS: Record<string, string> = {
   webauthn: 'VERIFIED BY HARDWARE KEY ATTESTATION',
 };
 
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY ?? '1x00000000000000000000AA';
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
 const TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
 const webauthnSupported = typeof PublicKeyCredential !== 'undefined'
