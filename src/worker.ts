@@ -1,8 +1,13 @@
 import { generateOgImage, generateOgHtml } from './og/schedule';
+import { handleEmailGate } from './emailGate';
+import { handleWebAuthnGate } from './webauthnGate';
 
 interface Env {
   ASSETS: { fetch: (req: Request) => Promise<Response> };
   GOOGLE_CALENDAR_API_KEY: string;
+  TURNSTILE_SECRET_KEY?: string;
+  CONTACT_EMAIL?: string;
+  WEBAUTHN_CHALLENGE_SECRET?: string;
 }
 
 const BOT_PATTERNS = [
@@ -28,6 +33,14 @@ const CALENDAR_ID = '7e2c6dfa4e2df80f152afadb1acca09030360115a5c3439e89daa557a14
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+
+    if (url.pathname === '/api/email/webauthn') {
+      return handleWebAuthnGate(request, url, env.CONTACT_EMAIL, env.WEBAUTHN_CHALLENGE_SECRET);
+    }
+
+    if (url.pathname === '/api/email') {
+      return handleEmailGate(request, url, env.CONTACT_EMAIL, env.TURNSTILE_SECRET_KEY);
+    }
 
     if (url.pathname === '/og/schedule') {
       return generateOgImage(env.GOOGLE_CALENDAR_API_KEY, request);

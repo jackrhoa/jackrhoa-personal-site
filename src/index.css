@@ -4,12 +4,16 @@
   color-scheme: light dark;
   --bg: #fff;
   --fg: #000;
+  --accent: #1d4ed8;
+  --accent-glow: #60a5fa;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #0a0a0a;
     --fg: #fff;
+    --accent: #93c5fd;
+    --accent-glow: #e0f2fe;
   }
 }
 
@@ -25,4 +29,48 @@ html, body, #root {
   font-family: 'Courier New', Courier, monospace;
   color: var(--fg);
   overflow: hidden;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.animate-reveal {
+  animation: reveal 900ms ease-out both;
+}
+
+@keyframes verified-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+.verified {
+  color: var(--accent);
+  background: linear-gradient(90deg, var(--accent) 40%, var(--accent-glow) 50%, var(--accent) 60%) 0 0 / 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: verified-shimmer 1.8s ease-in-out 0.9s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-reveal {
+    animation-duration: 1ms;
+  }
+
+  .verified {
+    animation: none;
+    background-position: 0 0;
+  }
 }

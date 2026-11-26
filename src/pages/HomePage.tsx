@@ -1,3 +1,5 @@
+import RevealEmail from './RevealEmail';
+
 const SECTIONS: { title: string; links: { name: string; href: string }[] }[] = [
   {
     title: 'EXPERIENCE',
@@ -7,7 +9,7 @@ const SECTIONS: { title: string; links: { name: string; href: string }[] }[] = [
     ],
   },
   {
-    title: 'OPEN SOURCE CONTRIBUTIONS',
+    title: 'OPEN SOURCE',
     links: [
       { name: 'nixpkgs', href: 'https://github.com/NixOS/nixpkgs/pulls?q=is%3Apr+author%3Ajackrhoa+is%3Amerged' },
       { name: 'eza', href: 'https://github.com/eza-community/eza' },
@@ -29,6 +31,7 @@ export default function HomePage() {
   return (
     <div className="h-full overflow-y-auto bg-[var(--bg)] text-[var(--fg)] font-serif">
       <div className="min-h-full w-full max-w-7xl mx-auto px-6 py-12 md:px-16 flex flex-col justify-center gap-16 text-center md:text-left">
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-normal md:text-center">Jack Rhoa</h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
           {SECTIONS.map(section => (
             <section key={section.title} className="flex flex-col gap-3">
@@ -43,10 +46,10 @@ export default function HomePage() {
                   {l.name}
                 </a>
               ))}
+              {section.title === 'CONTACT' && <RevealEmail className={`${linkClass} text-xl md:text-2xl lg:text-3xl`} />}
             </section>
           ))}
         </div>
-        <a href="/schedule" className={`${labelClass} ${linkClass}`}>SCHEDULE</a>
       </div>
     </div>
   );
