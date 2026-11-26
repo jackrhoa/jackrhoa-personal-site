@@ -89,7 +89,8 @@ export async function notifyUnlock(d: UnlockDetails, ntfyUrl: string, ntfyToken?
     Tags: 'unlock',
   };
   if (ntfyToken) headers.Authorization = `Bearer ${ntfyToken}`;
-  await fetch(ntfyUrl, { method: 'POST', headers, body: describeUnlock(d) });
+  const resp = await fetch(ntfyUrl, { method: 'POST', headers, body: describeUnlock(d) });
+  if (!resp.ok) throw new Error(`ntfy responded ${resp.status}: ${(await resp.text()).slice(0, 200)}`);
 }
 
 export async function recordUnlock(db: D1Database, d: UnlockDetails): Promise<void> {

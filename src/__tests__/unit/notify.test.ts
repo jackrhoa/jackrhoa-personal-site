@@ -62,4 +62,9 @@ describe('unlock notification', () => {
     );
     expect(run).toHaveBeenCalled();
   });
+
+  it('throws with the status when ntfy rejects the message', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('limit reached', { status: 429 })));
+    await expect(notifyUnlock(unlockDetails(visitor(), { method: 'turnstile' }), 'https://ntfy.sh/t')).rejects.toThrow('ntfy responded 429: limit reached');
+  });
 });

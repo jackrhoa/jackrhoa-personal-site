@@ -23,7 +23,7 @@ async function withUnlockNotification(request: Request, env: Env, ctx: Execution
   const data = await response.clone().json().catch(() => null) as Partial<Unlock> | null;
   if (typeof data?.method !== 'string') return response;
   const details = unlockDetails(request, { method: data.method, device: data.device });
-  if (env.NTFY_URL) ctx.waitUntil(notifyUnlock(details, env.NTFY_URL, env.NTFY_TOKEN).catch(() => {}));
+  if (env.NTFY_URL) ctx.waitUntil(notifyUnlock(details, env.NTFY_URL, env.NTFY_TOKEN).catch(err => console.error('notifyUnlock failed', err)));
   if (env.UNLOCKS_DB) ctx.waitUntil(recordUnlock(env.UNLOCKS_DB, details).catch(err => console.error('recordUnlock failed', err)));
   return response;
 }
