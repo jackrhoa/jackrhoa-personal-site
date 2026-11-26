@@ -5,7 +5,7 @@ import { isoCBOR } from '@simplewebauthn/server/helpers';
 import { handleWebAuthnGate } from '../../webauthnGate';
 
 const ORIGIN = 'https://jackrhoa.com';
-const URL_ = new URL(`${ORIGIN}/api/email/webauthn`);
+const URL_ = new URL(`${ORIGIN}/api/email/key`);
 const EMAIL = 'test@example.com';
 const SECRET = 'test-secret';
 const b64url = (b: Uint8Array) => Buffer.from(b).toString('base64url');
@@ -106,7 +106,7 @@ describe('webauthn gate', () => {
   });
 
   it('refuses unknown hostnames', async () => {
-    const evil = new URL('https://evil.example/api/email/webauthn');
+    const evil = new URL('https://evil.example/api/email/key');
     expect((await call('GET', undefined, evil)).status).toBe(403);
   });
 

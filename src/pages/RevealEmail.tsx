@@ -80,12 +80,12 @@ export default function RevealEmail({ className }: { className: string }) {
   async function verifyWithKey() {
     setState('key');
     try {
-      const optionsResp = await fetch('/api/email/webauthn', { cache: 'no-store' });
+      const optionsResp = await fetch('/api/email/key', { cache: 'no-store' });
       if (!optionsResp.ok) throw new Error(String(optionsResp.status));
       const publicKey = PublicKeyCredential.parseCreationOptionsFromJSON(await optionsResp.json());
       const credential = await navigator.credentials.create({ publicKey }) as PublicKeyCredential | null;
       if (!credential) throw new Error('no credential');
-      const resp = await fetch('/api/email/webauthn', {
+      const resp = await fetch('/api/email/key', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ response: credential.toJSON() }),

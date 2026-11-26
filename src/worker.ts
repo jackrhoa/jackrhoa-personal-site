@@ -34,7 +34,7 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    if (url.pathname === '/api/email/webauthn') {
+    if (url.pathname === '/api/email/key') {
       return handleWebAuthnGate(request, url, env.CONTACT_EMAIL, env.WEBAUTHN_CHALLENGE_SECRET);
     }
 

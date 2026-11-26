@@ -15,6 +15,7 @@ New routes must be added to both `src/main.tsx` and `SPA_ROUTES` in `src/worker.
 
 ## Hardware key metadata
 - `src/data/mdsStatements.json` is a verified, trimmed FIDO Metadata Service snapshot used by `src/webauthnGate.ts` (strict mode: unknown models are rejected)
+- Endpoint is `/api/email/key`. Never put "webauthn" in a URL path: Cloudflare's edge challenges any such path before it reaches the worker
 - Refresh it every month or two: download https://mds.fidoalliance.org/ in a browser (the server rate-limits scripts), then `node scripts/fetchMds.mjs <path-to-blob.jwt>`
 
 ## Infra (`infra/`)
