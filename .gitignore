@@ -36,3 +36,5 @@ infra/.terraform
 *.tfstate.*
 .direnv
 tfplan
+
+.secret
